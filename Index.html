@@ -409,7 +409,10 @@
         .seg button.on { background: #fff; color: var(--or-strong); box-shadow: 0 2px 8px rgba(80,40,10,.1); }
         .insight { border: 1px dashed #f6a36e; background: var(--or-soft); border-radius: 14px; padding: 12px 14px; font-size: 13px; margin-bottom: 14px; color: var(--or-deep); }
         .person { border: 1px solid var(--line); border-radius: 16px; margin-bottom: 10px; background: #fff; box-shadow: var(--shadow); overflow: hidden; }
+        .person.open { border: 2px solid var(--or-strong); }
         .person-head { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 0; background: transparent; text-align: left; min-height: 60px; color: var(--ink); }
+        .person-head:focus-visible { outline: none; }
+        .person:has(.person-head:focus-visible) { outline: 3px solid var(--or-strong); outline-offset: 2px; }
         .person-head .name { flex: 1; font-weight: 600; font-size: 14px; }
         .person-head .name small { display: block; font-weight: 500; font-size: 12px; color: var(--muted); }
         .person-head > .icon { transition: transform .2s; color: var(--muted); }
