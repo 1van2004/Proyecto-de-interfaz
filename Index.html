@@ -756,6 +756,58 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
         .res-actions .btn { margin: 0; }
     </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+#asistente .ia-tag{display:inline-block;font-size:11px;font-weight:700;background:var(--or-soft);color:var(--or-dark);border-radius:20px;padding:4px 10px;margin-bottom:10px}
+#asistente .ia-log{display:flex;flex-direction:column;gap:8px}
+#asistente .msg{max-width:94%;padding:8px 11px;border-radius:14px;font-size:13px;line-height:1.4;color:var(--ink)}
+#asistente .msg.bot{background:var(--cream);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+#asistente .msg.yo{background:var(--or);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+#asistente .crit{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+#asistente .crit span{background:#fff;border:1px solid var(--or);color:var(--or-dark);border-radius:20px;padding:4px 6px 4px 10px;font-size:13px;font-weight:600;display:inline-flex;gap:4px;align-items:center}
+#asistente .crit button{border:0;background:none;color:var(--or-dark);font-size:16px;line-height:1;padding:2px 6px;min-width:28px;min-height:28px}
+#asistente .row{display:flex;gap:8px;flex-wrap:wrap}
+#asistente .row .btn{margin-top:6px;flex:1;padding:11px;font-size:13px;min-width:120px}
+#asistente .rcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 10px;margin:6px 0;box-shadow:var(--shadow)}
+#asistente .rcard h3{margin-bottom:2px}
+#asistente .badge{display:inline-block;font-size:12px;font-weight:700;border-radius:8px;padding:3px 8px;margin:4px 4px 0 0}
+#asistente .ok{background:#e4f6ec;color:#16754a}#asistente .warn{background:#fff3d6;color:#8a5a00}#asistente .bad{background:#fde6e6;color:#b02a2a}
+#asistente .why{font-size:13px;color:var(--muted);margin-top:6px}
+#asistente .fuente{display:none;font-size:12px;background:var(--cream);border-radius:8px;padding:8px;margin-top:6px;color:var(--muted)}
+#asistente .rcard .row .btn{padding:8px;font-size:12px;min-height:40px}
+#asistente .ia-form{display:flex;gap:8px;background:#fff}
+#asistente .ia-form input{flex:1;padding:13px;border:1.5px solid var(--line);border-radius:14px;font:inherit;font-size:14px}
+#asistente .ia-form button{width:48px;border:0;border-radius:14px;background:var(--or);color:#fff;font-size:18px}
+#asistente .sug{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+#asistente .sug button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:8px 12px;font-size:12px;color:var(--ink)}
+#asistente .typing{opacity:.7;font-style:italic}
+#asistente.active{display:flex;flex-direction:column;height:calc(100dvh - 86px);min-height:0;overflow:hidden;padding:12px 16px 10px}
+#asistente h2{font-size:20px;margin:0 0 6px}
+#asistente .back{width:36px;height:36px;margin-bottom:6px;flex:none}
+#asistente .ia-tag{align-self:flex-start;flex:none;margin-bottom:6px}
+#asistente .ia-log{flex:1;min-height:0;overflow-y:auto;margin:0 -4px 8px;padding:0 4px;scroll-behavior:smooth}
+#asistente .sug,#asistente .ia-form{flex:none}
+#asistente .ia-form{padding:4px 0 0}
+#asistente .row .btn{padding:8px;font-size:12px;min-height:36px;min-width:100px}
+#asistente .rcard h3{font-size:15px}
+#asistente .rcard p{font-size:12px;line-height:1.35}
+#asistente.active{height:100dvh}
+.app:has(#asistente.active){padding-bottom:0!important}
+#asistente .msg.res{max-width:100%;align-self:stretch;padding:8px}
+#asistente .rcard h3 small{font-weight:500;color:var(--muted);font-size:12px}
+#asistente .rcard .meta2{margin:0 0 3px}
+#asistente .badge{font-size:11px;padding:2px 7px;margin:2px 4px 0 0}
+#asistente .fuente{font-size:12px;line-height:1.4}
+#asistente .rcard .row{flex-wrap:nowrap;margin-top:4px}
+#asistente .rcard .row .btn{min-height:32px;padding:5px;font-size:12px;min-width:0}
+#asistente .ia-log{scrollbar-width:thin;scrollbar-color:#e6d3c4 transparent}
+#asistente .ia-log::-webkit-scrollbar{width:6px}
+#asistente .ia-log::-webkit-scrollbar-thumb{background:#e6d3c4;border-radius:6px}
+.btn-ia{border-style:dashed}
+#iaFab{position:fixed;bottom:84px;right:max(10px,calc(50% - 205px));z-index:50;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:2px solid #fff;border-radius:50%;background:var(--or);color:#fff;font-size:18px;opacity:.92;box-shadow:0 4px 12px rgba(242,106,15,.35);cursor:pointer}
+#iaFab:hover{background:var(--or-dark)}
+#iaFab{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}#iaFab:active{cursor:grabbing}
+#asistente.active ~ #iaFab,#inicio.active ~ #iaFab,#login.active ~ #iaFab,#registro.active ~ #iaFab{display:none}
+</style>
 </head>
 
 <body>
@@ -1144,6 +1196,7 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
         </div>
 
 
+        
         <button class="btn btn-primary" type="button"
                 onclick="buscarOpciones()">Buscar opciones</button>
 
@@ -1153,6 +1206,16 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
     <!-- =================================
          4. OPCIONES
     ================================== -->
+
+    <section id="asistente" class="screen">
+<button class="back" type="button" onclick="iaCerrar()" aria-label="Volver"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg></button>
+<h2>Asistente inteligente</h2>
+
+<div class="ia-log" id="iaLog" role="log" aria-live="polite" aria-label="Conversación con el asistente"></div>
+<div class="sug" id="iaSug"><button type="button" onclick="iaEnviar('Somos 4 estudiantes, ₡8.000 por persona, tenemos 45 minutos y uno es vegetariano')">Somos 4, ₡8.000 c/u, 45 min, 1 vegetariano</button><button type="button" onclick="iaEnviar('Queremos algo barato y rápido')">Algo barato y rápido</button></div>
+<div class="ia-form"><input id="iaInput" aria-label="Escribe tu solicitud" placeholder="Escribe lo que necesitan..." onkeydown="if(event.key==='Enter')iaEnviar()"><button type="button" onclick="iaEnviar()" aria-label="Enviar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+</section>
+<button id="iaFab" type="button" aria-label="Abrir asistente inteligente (se puede arrastrar)" title="Asistente (arrástralo para moverlo)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12Z"/><path d="M12 8v5M9.5 10.5h5"/></svg></button>
 
     <section id="opciones" class="screen">
 
@@ -2849,6 +2912,58 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
         document.getElementById("ganadorQuienes").textContent = !nombres.length ? "" :
             (nombres.length === 1 ? "Votó " : "Votaron ") + (resto > 0 ? nombres.slice(0, 3).join(", ") + " y " + resto + (resto === 1 ? " más" : " más") : lista);
     };
+})();
+</script>
+<script>
+(function(){
+const R=[{n:"Sabor Local",t:"Comida típica",lv:2,km:1.2,r:4.5,rv:120},
+{n:"La Pizzería",t:"Pizza",lv:2,km:0.8,r:4.3,rv:85},
+{n:"Sushi Time",t:"Sushi",lv:3,km:1.5,r:4.7,rv:200}];
+let C={},prev;
+const log=()=>document.getElementById("iaLog");
+function add(cls,h){const d=document.createElement("div");d.className="msg "+cls;d.innerHTML=h;log().appendChild(d);d.scrollIntoView({block:"start"});return d}
+const fmt=n=>"₡"+n.toLocaleString("es-CR");
+const NUM={un:1,uno:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6};
+function parse(t){const s=t.toLowerCase(),c={};
+let m=s.match(/(\d+|un|dos|tres|cuatro|cinco|seis)\s+(estudiantes|personas|amig)/);if(m)c.personas=NUM[m[1]]||+m[1];
+m=s.match(/₡\s?([\d.]+)/)||s.match(/(\d[\d.]{3,})\s*(colones|por persona)/);if(m)c.presupuesto=+m[1].replace(/\./g,"");
+if(/barato|econ[oó]mic/.test(s)&&!c.presupuesto)c.presupuesto=4000;
+m=s.match(/(\d+)\s*min/);if(m)c.tiempo=+m[1];else if(/r[aá]pido/.test(s))c.tiempo=30;else if(/1 hora|una hora/.test(s))c.tiempo=60;
+if(/vegetarian/.test(s))c.veg=true;if(/sin gluten/.test(s))c.gluten=true;if(/alergi/.test(s))c.alergia=true;
+return c}
+function chips(){const L=[];if(C.personas)L.push(["personas",C.personas+" personas"]);if(C.presupuesto)L.push(["presupuesto",fmt(C.presupuesto)+" por persona"]);if(C.tiempo)L.push(["tiempo",C.tiempo+" min"]);if(C.veg)L.push(["veg","Vegetariano"]);if(C.gluten)L.push(["gluten","Sin gluten"]);if(C.alergia)L.push(["alergia","Alergias"]);
+return '<div class="crit">'+L.map(([k,v])=>`<span>${v}<button type="button" aria-label="Quitar ${v}" onclick="iaQuitar('${k}')">×</button></span>`).join("")+"</div>"}
+window.iaQuitar=function(k){delete C[k];add("bot","Listo, quité ese criterio. Estos son los criterios actuales:"+chips()+confirmBtns())};
+function confirmBtns(){return '<div class="row"><button class="btn btn-primary" type="button" onclick="iaBuscar()">Confirmar y buscar</button></div>'}
+window.iaEnviar=function(txt){const i=document.getElementById("iaInput");const t=(txt||i.value).trim();if(!t)return;i.value="";document.getElementById("iaSug").style.display="none";add("yo",esc(t));
+const n=parse(t);Object.assign(C,n);
+if(!C.presupuesto&&!C.tiempo){add("bot","Para buscar bien necesito al menos el <b>presupuesto por persona</b> o el <b>tiempo disponible</b>. ¿Cuál es?");return}
+if(!C.presupuesto){add("bot","Entendí esto:"+chips()+"Me falta el <b>presupuesto por persona</b>. ¿Cuánto pueden gastar?");return}
+let nota=(C.alergia?'<p class="why"><b>Importante:</b> las alergias no puedo garantizarlas: deben confirmarse directamente con el restaurante.</p>':"");
+add("bot","Esto es lo que entendí. ¿Es correcto?"+chips()+nota+confirmBtns())};
+window.iaBuscar=function(){const d=add("bot typing","Buscando restaurantes con tus criterios…");
+setTimeout(()=>{d.remove();const rs=R.map(r=>{let e=[];r.min=Math.round(r.km*12);const mx=C.presupuesto<=5000?1:C.presupuesto<=10000?2:3;if(C.presupuesto&&r.lv>mx)e.push(["bad","Excede el presupuesto","Su precio es "+"₡".repeat(r.lv)+" y tu presupuesto de "+fmt(C.presupuesto)+" admite hasta "+"₡".repeat(mx)+"."]);
+if(C.tiempo&&r.min>C.tiempo/3)e.push(["warn","Tiempo ajustado","Queda a "+r.min+" min y tienen "+C.tiempo+"."]);
+if(C.veg)e.push(["warn","Sin confirmar","La app no tiene información alimentaria de este lugar. Confirma la opción vegetariana con el restaurante."]);
+if(!e.some(x=>x[0]==="bad"))e.unshift(["ok","Cumple tu presupuesto","Precio "+"₡".repeat(r.lv)+" · ★ "+r.r+" ("+r.rv+" reseñas) · "+r.km+" km (≈"+r.min+" min a pie)."]);return{r,e}});
+const ok=rs.filter(x=>!x.e.some(y=>y[0]==="bad"));
+let h=ok.length?`Encontré <b>${ok.length}</b> opción(es) dentro de tu presupuesto. Revisa lo que falta confirmar. <b>La decisión final es del grupo.</b>`:"No encontré restaurantes que cumplan todos los criterios. Puedes subir el presupuesto o quitar algún criterio.";
+h+=rs.sort((a,b)=>a.e.filter(x=>x[0]==="bad").length-b.e.filter(x=>x[0]==="bad").length).map(({r,e})=>`<div class="rcard"><h3>${r.n} <small>· ${r.t}</small></h3><p class="meta2">★ ${r.r} · ${r.km} km · ${"₡".repeat(r.lv)}</p>${e.map(x=>`<span class="badge ${x[0]}">${x[1]}</span>`).join("")}<div class="fuente" id="f-${r.n.replace(/\s/g,"")}">${e.map(x=>x[2]).join("<br>")}<br><i>Fuente: restaurantes registrados en ¿Dónde comemos? No incluye menú ni información alimentaria.</i></div><div class="row"><button class="btn" type="button" onclick="document.getElementById('f-${r.n.replace(/\s/g,"")}').style.display=(this.dataset.o^=1)?'block':'none'">Detalles</button><button class="btn" type="button" onclick="agregarComparar('${r.n}')">Comparar</button></div></div>`).join("");
+h+='<div class="row"><button class="btn" type="button" onclick="iaCambiar()">Cambiar criterios</button><button class="btn btn-primary" type="button" onclick="iaAFiltros()">Ver con filtros</button></div>';add("bot res",h)},900)};
+window.iaCambiar=function(){add("bot","Claro. Dime qué quieres cambiar, por ejemplo: «subamos a ₡6.000» o «sin gluten».")};
+window.iaAFiltros=function(){const p=document.getElementById("presupuesto"),t=document.getElementById("tiempo");
+p.selectedIndex=C.presupuesto<=5000?1:C.presupuesto<=10000?2:3;t.selectedIndex=C.tiempo<=30?1:C.tiempo<=60?2:3;
+document.querySelectorAll('input[name="restriccion"]').forEach(x=>{x.checked=(x.value==="vegetariano"&&C.veg)||(x.value==="sin-gluten"&&C.gluten)||(x.value==="alergias"&&C.alergia)});
+const u=document.getElementById("ubicacion");if(!u.value)u.selectedIndex=1;const ch=document.querySelector("#preferencias .chip");if(ch&&!document.querySelector("#preferencias .chip.selected"))ch.classList.add("selected");
+mostrarPantalla("preferencias");avisar("Pasé tus criterios a los filtros. Puedes ajustarlos y buscar.")};
+window.iaCerrar=function(){mostrarPantalla(prev||"inicio")};window.iaAbrir=function(){const a=document.querySelector(".screen.active");if(a&&a.id!=="asistente")prev=a.id;if(!log().children.length)add("bot","Hola. Soy el asistente de ¿Dónde comemos?. Escribe presupuesto, tiempo, personas y restricciones, o toca un ejemplo.");mostrarPantalla("asistente")};
+const fab=document.getElementById("iaFab");let drag=null,moved=false;
+function place(x,y){x=Math.min(Math.max(4,x),innerWidth-48);y=Math.min(Math.max(4,y),innerHeight-48);fab.style.left=x+"px";fab.style.top=y+"px";fab.style.right="auto";fab.style.bottom="auto"}
+try{const s=JSON.parse(localStorage.getItem("iaFabPos")||"null");if(s)place(s.x,s.y)}catch(e){}
+fab.addEventListener("pointerdown",e=>{const r=fab.getBoundingClientRect();drag={dx:e.clientX-r.left,dy:e.clientY-r.top,sx:e.clientX,sy:e.clientY};moved=false;try{fab.setPointerCapture(e.pointerId)}catch(_){}});
+fab.addEventListener("pointermove",e=>{if(!drag)return;if(Math.abs(e.clientX-drag.sx)+Math.abs(e.clientY-drag.sy)>6)moved=true;if(moved)place(e.clientX-drag.dx,e.clientY-drag.dy)});
+fab.addEventListener("pointerup",()=>{if(drag&&moved){try{localStorage.setItem("iaFabPos",JSON.stringify({x:parseFloat(fab.style.left),y:parseFloat(fab.style.top)}))}catch(e){}}drag=null});
+fab.addEventListener("click",()=>{if(moved){moved=false;return}iaAbrir()});
 })();
 </script>
 </body>
