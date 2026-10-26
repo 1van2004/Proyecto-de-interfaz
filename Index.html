@@ -806,7 +806,305 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
 #iaFab{position:fixed;bottom:84px;right:max(10px,calc(50% - 205px));z-index:50;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:2px solid #fff;border-radius:50%;background:var(--or);color:#fff;font-size:18px;opacity:.92;box-shadow:0 4px 12px rgba(242,106,15,.35);cursor:pointer}
 #iaFab:hover{background:var(--or-dark)}
 #iaFab{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}#iaFab:active{cursor:grabbing}
-#asistente.active ~ #iaFab,#inicio.active ~ #iaFab,#login.active ~ #iaFab,#registro.active ~ #iaFab{display:none}
+.phone-screen:has(#asistente.active, #inicio.active, #login.active, #registro.active) #iaFab{display:none}
+</style>
+<style>
+/* =========================================================
+   MARCO DE TELÉFONO: la página no hace scroll; cada pantalla
+   se desplaza dentro del teléfono.
+========================================================= */
+html, body { height: 100%; overflow: hidden; }
+body { min-height: 0; background: radial-gradient(circle at 12% 12%, #ffe3cc 0, transparent 38%), radial-gradient(circle at 88% 92%, #ffd9bd 0, transparent 42%), #f6efe8; }
+.stage { position: fixed; inset: 0; overflow: clip; }
+.phone {
+    --pw: 390px; --ph: 844px;
+    position: absolute; left: 50%; top: 50%;
+    width: calc(var(--pw) + 28px); height: calc(var(--ph) + 28px); padding: 14px;
+    border-radius: 64px; background: #1f1a17;
+    box-shadow: inset 0 0 0 2px #4a403a, 0 0 0 2px #cfc4ba, 0 40px 80px rgba(60, 30, 10, .28), 0 12px 24px rgba(60, 30, 10, .16);
+    transform: translate(-50%, -50%) scale(var(--phone-scale, 1));
+}
+.phone::before { content: ""; position: absolute; right: -5px; top: 210px; width: 5px; height: 96px; border-radius: 0 4px 4px 0; background: #2b2420; }
+.phone::after { content: ""; position: absolute; left: -5px; top: 170px; width: 5px; height: 62px; border-radius: 4px 0 0 4px; background: #2b2420; box-shadow: 0 80px 0 #2b2420, 0 -64px 0 -10px #2b2420; }
+.phone-island { position: absolute; top: 25px; left: 50%; transform: translateX(-50%); width: 122px; height: 34px; border-radius: 20px; background: #000; z-index: 3; }
+.phone-screen {
+    position: relative; width: 100%; height: 100%; border-radius: 50px; overflow: clip; background: #fff;
+    contain: layout paint; display: flex; flex-direction: column;
+}
+.status-bar { flex: none; height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 8px 30px 0 40px; background: #faf6f1; color: var(--ink); font-size: 15px; font-weight: 600; position: relative; z-index: 2; transition: background .25s; }
+.sb-icons { display: flex; align-items: center; gap: 6px; }
+.sb-icons svg { fill: currentColor; }
+.sb-bat { width: 25px; height: 12px; border: 1.5px solid currentColor; border-radius: 4px; padding: 1.5px; position: relative; opacity: .9; }
+.sb-bat::after { content: ""; position: absolute; right: -4px; top: 3px; width: 2px; height: 4px; border-radius: 0 2px 2px 0; background: currentColor; }
+.sb-bat i { display: block; width: 72%; height: 100%; border-radius: 2px; background: currentColor; }
+.phone-screen:has(#grupo.active) .status-bar { background: #fff; }
+.phone-screen:has(#confirmacion.active) .status-bar { background: var(--ok-glow); }
+.phone-screen:has(#mapa.active) .status-bar { background: #eceee6; }
+.phone-screen:has(#detalle.active) .status-bar { background: #1f1a17; color: #fff; }
+.home-indicator { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); width: 134px; height: 5px; border-radius: 3px; background: #1f1a17; opacity: .85; z-index: 400; pointer-events: none; }
+
+.app-viewport { position: relative; flex: 1; min-height: 0; }
+.phone-screen .app {
+    position: absolute; inset: 0; width: auto; max-width: none; min-height: 0; margin: 0; padding: 0;
+    border-radius: 0; box-shadow: none; overflow: clip; zoom: var(--zoom, 1);
+}
+.phone-screen .screen { min-height: 0; height: 100%; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none; }
+.phone-screen .screen::-webkit-scrollbar { display: none; }
+.scroll-ind { position: absolute; top: 0; right: 5px; width: 4px; border-radius: 3px; background: rgba(31, 26, 23, .38); opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 150; }
+.scroll-ind.on { opacity: 1; }
+.phone-screen .screen:not(.auth) { padding-bottom: 40px; }
+.phone-screen:has(#appNav[style*="flex"]) .screen { padding-bottom: 112px; }
+.phone-screen .auth-body { padding-bottom: 44px; }
+.phone-screen #asistente.active { height: 100%; padding-bottom: 26px; }
+.screen.active.home > *, .screen.active.confirmation > * { flex-shrink: 0; }
+.phone-screen .confirmation { justify-content: flex-start; }
+.phone-screen .confirmation > .check-icon { margin-top: auto; }
+.phone-screen .confirmation > :last-child { margin-bottom: auto; }
+.phone-screen .app-nav { width: 100%; padding-bottom: 22px; }
+.app-nav button { zoom: var(--zoom, 1); }
+.toast { font-size: calc(14px * var(--zoom, 1)); }
+#iaFab { right: 16px; bottom: 104px; }
+
+@media (max-width: 520px) {
+    .phone { left: 0; top: 0; width: 100%; height: 100%; padding: 0; border-radius: 0; box-shadow: none; transform: none; }
+    .phone::before, .phone::after, .phone-island, .status-bar, .home-indicator { display: none; }
+    .phone-screen { border-radius: 0; }
+    .phone-screen .app-nav { padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+}
+
+/* =========================================================
+   TAMAÑO DE LETRA (Configuración)
+========================================================= */
+html[data-letra="pequena"] { --zoom: .9; }
+html[data-letra="grande"] { --zoom: 1.15; }
+html[data-letra="muy-grande"] { --zoom: 1.3; }
+
+/* =========================================================
+   PALETA COMO VARIABLES (modo daltonismo)
+   Por defecto conservan exactamente los colores originales;
+   cada modo redefine la paleta de TODA la aplicación.
+========================================================= */
+:root {
+    --ok: #1f9d5b; --ok-ink: #157347; --ok-soft: #e7f7ee; --ok-glow: #d9f4e3;
+    --bad: #d93a3a; --bad-ink: #b42318; --bad-soft: #fdeaea;
+    --fav: #e5484d; --star: #f5b82e; --star-ink: #d98e04;
+    --warn: #8a5a00; --warn-soft: #fff3d6; --am: #b45309; --am-soft: #fef3c7;
+    --or-hover: #9a3412; --or-tint: rgba(194, 65, 12, .22); --or-light: #f6a36e; --or-track: #f6dcc3; --toast-ico: #fdba74;
+    --av1-bg: #dcefdc; --av1: #2f6b36; --av2-bg: #fde9b8; --av2: #8a5a00; --av3-bg: #d6e4f8; --av3: #1d4a8f; --av4-bg: #fcd9e0; --av4: #a3304a;
+    --w1: #c2410c; --w2: #2563b8; --w3: #3f7d45; --w4: #b45309; --w5: #a3304a; --w6: #5b3f8c; --w7: #8a4b2a; --w8: #1d6b74;
+}
+/* Rojo-verde (protanopía / deuteranopía): todo se apoya en el eje azul-naranja.
+   Principal azul, éxito verde azulado, error bermellón, avisos ámbar (paleta Okabe-Ito). */
+html[data-daltonismo="rg"] {
+    --or: #1f6fbf; --or-dark: #0d5aa7; --or-soft: #e7f0fa; --or-strong: #0b5cad; --or-deep: #073f78; --btn: #0b5cad;
+    --or-hover: #084785; --or-tint: rgba(11, 92, 173, .24); --or-light: #9cc3ea; --or-track: #d3e3f4; --toast-ico: #9cc3ea;
+    --green: #00796b; --red: #c43e00;
+    --ok: #00796b; --ok-ink: #005f54; --ok-soft: #e0f2f0; --ok-glow: #d6eeea;
+    --bad: #c43e00; --bad-ink: #a33400; --bad-soft: #fdeee3;
+    --fav: #d55e00; --star: #e69f00; --star-ink: #a86b00;
+    --warn: #7a4f00; --warn-soft: #fdf0d0; --am: #a86b00; --am-soft: #fdf0d0;
+    --c-yellow: #e69f00; --c-pink: #cc79a7; --c-blue: #56b4e9; --c-green: #009e73;
+    --av1-bg: #dce9f7; --av1: #0b4f94; --av2-bg: #fdf0d0; --av2: #7a4f00; --av3-bg: #f1e1ec; --av3: #8a3a6b; --av4-bg: #e6e2de; --av4: #4a403a;
+    --w1: #0072b2; --w2: #e69f00; --w3: #56b4e9; --w4: #d55e00; --w5: #cc79a7; --w6: #f0e442; --w7: #009e73; --w8: #4d4d4d;
+}
+/* Azul-amarillo (tritanopía): todo se apoya en el eje rojo-verde azulado.
+   Principal rojo, éxito verde azulado, error granate; sin amarillos ni pares azul/verde. */
+html[data-daltonismo="tri"] {
+    --or: #d32f2f; --or-dark: #b71c1c; --or-soft: #fdecee; --or-strong: #c62828; --or-deep: #7f1d1d; --btn: #c62828;
+    --or-hover: #9b1c1c; --or-tint: rgba(198, 40, 40, .22); --or-light: #ef9a9a; --or-track: #f6d0d0; --toast-ico: #ef9a9a;
+    --green: #00796b; --red: #7f0000;
+    --ok: #00796b; --ok-ink: #005f54; --ok-soft: #e0f2f0; --ok-glow: #d3eeea;
+    --bad: #7f0000; --bad-ink: #7f0000; --bad-soft: #f4e3e3;
+    --fav: #c62828; --star: #e57373; --star-ink: #b71c1c;
+    --warn: #5d4037; --warn-soft: #efe7e3; --am: #5d4037; --am-soft: #efe7e3;
+    --c-yellow: #e57373; --c-pink: #4db6ac; --c-blue: #90a4ae; --c-green: #00796b;
+    --av1-bg: #fbe3e3; --av1: #a31f1f; --av2-bg: #d7efed; --av2: #00695c; --av3-bg: #e8eaec; --av3: #37474f; --av4-bg: #efe3dc; --av4: #5d4037;
+    --w1: #c62828; --w2: #00838f; --w3: #f06292; --w4: #4e342e; --w5: #90a4ae; --w6: #ef6c00; --w7: #263238; --w8: #80deea;
+}
+.member span, .badge-fin, .pill.ok, .pill.pill-fin, .recent-ico.pill-fin, td.best, .match, .vis-note, #asistente .ok { background: var(--ok-soft); color: var(--ok-ink); }
+.check-icon { background: var(--ok); box-shadow: 0 10px 22px color-mix(in srgb, var(--ok) 30%, transparent); }
+.confirmation { background: radial-gradient(circle at 50% 0, var(--ok-glow) 0, #fff 62%); }
+.selected-place, .history-card:has(.badge-fin) { border-left-color: var(--ok); }
+.mode-pill::before { background: var(--ok); }
+.btn-ok { color: var(--ok-ink); border-color: var(--ok); } .btn-ok:hover { background: var(--ok-soft); }
+.btn-no { color: var(--bad-ink); border-color: var(--bad); } .btn-no:hover { background: var(--bad-soft); }
+.timer.urgent { background: var(--bad-soft); color: var(--bad-ink); }
+.remove:hover { background: var(--bad-soft); color: var(--bad); }
+.error { color: var(--bad); }
+#asistente .bad { background: var(--bad-soft); color: var(--bad-ink); }
+.heart.on { color: var(--fav); } .heart.on .icon { fill: var(--fav); }
+.stat-rd .stat-ico { background: var(--bad-soft); color: var(--fav); }
+.icon:has(use[href="#i-star"]) { color: var(--star-ink); fill: var(--star); }
+/* Neutros, fondos y sombras: también cambian con cada modo */
+:root {
+    --page-bg: #f6efe8; --page-a: #ffe3cc; --page-b: #ffd9bd;
+    --surface: #faf6f1; --surface-2: #f3ece4; --track: #f3ebe4; --divider: #efe7e0; --edge: #eee5dc;
+    --avatar-bg: #ece4db; --field-bg: #fffaf5; --deco: #cfc4ba; --dash: #e3d3c4; --timer-fill: #e6dcd2;
+    --sh: 80, 40, 10; --shadow: 0 6px 18px rgba(var(--sh), .07);
+    --img-filter: none;
+}
+html[data-daltonismo="rg"] {
+    --cream: #f5f9fd; --line: #dfe8f1; --line-2: #c8d4e1; --soft: #eef3f8; --muted: #5f6b78; --icon: #46525f; --nav-off: #56616d;
+    --page-bg: #eef3f8; --page-a: #d6e6f7; --page-b: #fbe9c8;
+    --surface: #f3f7fb; --surface-2: #e6eef7; --track: #e3eaf2; --divider: #e3eaf2; --edge: #dfe8f1;
+    --avatar-bg: #e0e8f1; --field-bg: #f7fafd; --deco: #b9c7d6; --dash: #c8d4e1; --timer-fill: #d6e2ee;
+    --sh: 20, 40, 70; --img-filter: url(#f-dalt-rg);
+}
+html[data-daltonismo="tri"] {
+    --cream: #f8f8f8; --line: #e6e6e6; --line-2: #d0d0d0; --soft: #f2f2f2; --muted: #666666; --icon: #4a4a4a; --nav-off: #5c5c5c;
+    --page-bg: #f1f1f1; --page-a: #f6dcdc; --page-b: #d9eeec;
+    --surface: #f6f6f6; --surface-2: #ececec; --track: #ebebeb; --divider: #e8e8e8; --edge: #e4e4e4;
+    --avatar-bg: #e6e6e6; --field-bg: #fafafa; --deco: #c4c4c4; --dash: #cfcfcf; --timer-fill: #dedede;
+    --sh: 30, 30, 30; --img-filter: url(#f-dalt-tri);
+}
+body { background: radial-gradient(circle at 12% 12%, var(--page-a) 0, transparent 38%), radial-gradient(circle at 88% 92%, var(--page-b) 0, transparent 42%), var(--page-bg); }
+.phone { box-shadow: inset 0 0 0 2px #4a403a, 0 0 0 2px var(--deco), 0 40px 80px rgba(var(--sh), .28), 0 12px 24px rgba(var(--sh), .16); }
+.status-bar, .page-head, .mini-profile, .profile-summary { background: var(--surface); }
+.home { background: linear-gradient(180deg, var(--surface) 0%, #fff 72%); }
+.auth-hero { background: var(--surface); border-bottom-color: var(--edge); }
+.page-head { border-bottom-color: var(--edge); }
+.hero-stage, .auth-photo, .restaurant-img, .detail-image { background: var(--surface-2); }
+.group-art { background: radial-gradient(circle at 50% 45%, var(--surface-2), #fff 70%); }
+#grupo .group-art { background: radial-gradient(ellipse at 50% 55%, var(--surface-2) 0, var(--surface) 62%, #fff 100%); }
+.avatar, .profile-avatar, #grupo .mini-profile .avatar { background: var(--avatar-bg); }
+.remove { background: var(--soft); }
+.bar, .step-bar, .seg, .badge-rol, .pill.wait, .recent-ico.pill-exp, .pill.pill-exp { background: var(--track); }
+.state { border-color: var(--dash); }
+.heart { color: var(--muted); }
+.pref-row { border-bottom-color: var(--divider); }
+.field input { background: var(--field-bg); }
+html:is([data-daltonismo="rg"], [data-daltonismo="tri"]) .search input { background: var(--surface); }
+.field input:-webkit-autofill { -webkit-box-shadow: 0 0 0 100px var(--field-bg) inset; }
+.timer { background: linear-gradient(90deg, var(--timer-fill) var(--p, 100%), var(--soft) var(--p, 100%)); }
+.home .d1, .home .d2, .home .d3, .home .d4, .home .d5, .home .spark, .auth-hero .a1, .auth-hero .a2, .auth-hero .a3, .auth-hero .a4 { color: var(--deco); }
+.win-voters { border-top-color: var(--divider); }
+#listaResultados .result, #listaResultados .result.is-win { border-bottom-color: var(--divider); }
+#listaResultados .bar { background: var(--divider); }
+#listaResultados .bar-fill { background: var(--deco); }
+.mode-pill[data-modo="anon"]::before { background: var(--muted); }
+#asistente .ia-log { scrollbar-color: var(--dash) transparent; }
+#asistente .ia-log::-webkit-scrollbar-thumb { background: var(--dash); }
+.back { box-shadow: 0 2px 8px rgba(var(--sh), .06); }
+.bell-button { box-shadow: 0 3px 10px rgba(var(--sh), .06); }
+.auth-card { box-shadow: 0 14px 34px rgba(var(--sh), .09); }
+.decision-card .dc-ico { box-shadow: 0 2px 8px rgba(var(--sh), .08); }
+.seg button.on { box-shadow: 0 2px 8px rgba(var(--sh), .1); }
+.wheel-wrap .wheel { box-shadow: 0 18px 34px rgba(var(--sh), .22); }
+.restaurant[data-tipo] .restaurant-img { background: var(--surface-2); color: var(--icon); }
+.key-badge { box-shadow: 0 10px 22px var(--or-tint); }
+/* Fotos, ilustraciones, trofeo y mapa: filtro de corrección de color del modo activo */
+img, .thumb-art, .art-people, .win-trophy, #mapa .map { filter: var(--img-filter); }
+.hero-stage img { filter: var(--img-filter) drop-shadow(0 -4px 14px rgba(var(--sh), .18)); }
+html:not([data-daltonismo="rg"]):not([data-daltonismo="tri"]) .hero-stage img { filter: drop-shadow(0 -4px 14px rgba(120, 50, 0, .18)); }
+
+/* Colores que estaban escritos a mano: ahora leen la paleta activa */
+.btn-primary { box-shadow: 0 8px 18px var(--or-tint); }
+.btn-primary:hover { background: var(--or-hover); border-color: var(--or-hover); }
+input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 4px color-mix(in srgb, var(--or) 14%, transparent); }
+.option-box:hover, .chip:hover, .stat:hover { border-color: var(--or-light); }
+.chip.selected { box-shadow: 0 0 0 3px color-mix(in srgb, var(--or) 14%, transparent); }
+.page-head .step-bar { background: var(--or-track); }
+.toast .icon { color: var(--toast-ico); }
+#iaFab { box-shadow: 0 4px 12px var(--or-tint); }
+.auth-photo { box-shadow: 0 16px 32px var(--or-tint); }
+.hero-stage { box-shadow: 0 18px 36px var(--or-tint); }
+.home .logo-placeholder { box-shadow: 0 10px 24px var(--or-tint); }
+.stat-or .stat-ico { background: var(--or-soft); color: var(--or-strong); }
+.stat-am .stat-ico { background: var(--am-soft); color: var(--am); }
+#asistente .warn { background: var(--warn-soft); color: var(--warn); }
+#mapa .map [fill="#f26a1b"] { fill: var(--or); }
+.member:nth-child(4n+1) .avatar, .person:nth-child(4n+1) .avatar, .avatar-stack .avatar:nth-child(4n+1), .vchip:nth-child(4n+1) .avatar { background: var(--av1-bg); color: var(--av1); }
+.member:nth-child(4n+2) .avatar, .person:nth-child(4n+2) .avatar, .avatar-stack .avatar:nth-child(4n+2), .vchip:nth-child(4n+2) .avatar { background: var(--av2-bg); color: var(--av2); }
+.member:nth-child(4n+3) .avatar, .person:nth-child(4n+3) .avatar, .avatar-stack .avatar:nth-child(4n+3), .vchip:nth-child(4n+3) .avatar { background: var(--av3-bg); color: var(--av3); }
+.member:nth-child(4n) .avatar, .person:nth-child(4n) .avatar, .avatar-stack .avatar:nth-child(4n), .vchip:nth-child(4n) .avatar { background: var(--av4-bg); color: var(--av4); }
+
+/* Mi grupo: solo Grupos y Ganadores */
+.stat-row { grid-template-columns: repeat(2, 1fr); }
+
+/* Ruleta bloqueada hasta que termine el tiempo */
+.lock-note { display: flex; align-items: center; gap: 8px; font-size: 12.5px; line-height: 1.4; color: var(--ink); background: var(--soft); border-radius: 12px; padding: 10px 12px; margin: 0 0 14px; }
+.lock-note .icon { width: 16px; height: 16px; flex-shrink: 0; color: var(--icon); }
+.tie-card .lock-note { margin: 12px 0 0; background: #fff; }
+.wheel-hub { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+.wheel-hub .icon { width: 18px; height: 18px; }
+.wheel-hub small { font-size: 11px; font-weight: 700; }
+.decision-card .btn-inline { margin: 10px 0 0; }
+
+/* =========================================================
+   CONFIGURACIÓN
+========================================================= */
+.set-card { border: 1px solid var(--line); border-radius: 18px; background: #fff; box-shadow: var(--shadow); padding: 16px; margin-bottom: 14px; }
+.set-head { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+.set-head h3 { margin: 0 0 2px; font-size: 15px; }
+.set-head p { font-size: 12.5px; line-height: 1.4; }
+.set-ico { width: 40px; height: 40px; border-radius: 12px; background: var(--soft); color: var(--icon); display: grid; place-items: center; flex-shrink: 0; }
+.seg.seg-4 { grid-template-columns: repeat(4, 1fr); margin-bottom: 10px; }
+.seg-4 button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 60px; font-size: 11px; line-height: 1.15; }
+.seg-4 .aa { font-weight: 800; line-height: 1; }
+.set-preview { padding: 12px 14px; border-radius: 12px; background: var(--soft); color: var(--ink); font-size: 14px; }
+.check.cb-opt { gap: 12px; padding: 12px 14px; }
+.check.cb-opt input { margin: 0; flex-shrink: 0; }
+.cb-opt .vt { flex: 1; min-width: 0; }
+.check.cb-opt { align-items: flex-start; }
+.check.cb-opt input { margin-top: 3px; }
+.pal { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; }
+.pal span { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 500; color: var(--ink); }
+.pal i { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 1px rgba(0, 0, 0, .18); }
+.set-note { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+/* =========================================================
+   MÉTODO DE DECISIÓN Y LUGARES SORTEADOS
+========================================================= */
+#bloqueMetodo + #bloqueTipoVotacion { margin-top: 14px; }
+.decision-card { border: 1px solid var(--line); border-radius: 18px; background: var(--cream); padding: 14px 16px; margin: 14px 0 18px; }
+.dc-row { display: flex; gap: 12px; align-items: center; }
+.dc-row strong { display: block; font-size: 14px; }
+.dc-row small { display: block; font-size: 12px; color: var(--muted); line-height: 1.4; }
+.dc-ico { width: 40px; height: 40px; border-radius: 12px; background: #fff; color: var(--or-strong); display: grid; place-items: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(80, 40, 10, .08); }
+.dc-title { margin: 14px 0 6px; font-size: 12.5px; font-weight: 700; color: var(--ink); }
+.dc-title span { font-weight: 500; color: var(--muted); }
+.dc-chips .tag { margin: 0 4px 4px 0; background: #fff; border: 1px solid var(--line); }
+.sorteo-note { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); margin: -4px 0 12px; }
+.sorteo-note .icon { width: 16px; height: 16px; color: var(--icon); }
+
+/* =========================================================
+   EMPATE Y RULETA
+========================================================= */
+.tie-card { border: 1.5px dashed var(--or-strong); background: var(--or-soft); border-radius: 16px; padding: 14px 16px; margin: -10px 0 22px; }
+.tie-head { display: flex; gap: 12px; align-items: flex-start; }
+.tie-head strong { display: block; font-size: 15px; color: var(--ink); }
+.tie-head p { font-size: 12.5px; color: var(--ink); margin-top: 2px; }
+.tie-ico { width: 40px; height: 40px; border-radius: 12px; background: #fff; color: var(--or-strong); display: grid; place-items: center; flex-shrink: 0; }
+.tie-card .btn { margin-top: 12px; }
+
+.ruleta-nota { font-size: 13.5px; color: var(--ink); line-height: 1.5; margin-bottom: 4px; }
+.wheel-wrap { position: relative; width: min(290px, 100%); aspect-ratio: 1; margin: 22px auto 18px; }
+.wheel { width: 100%; height: 100%; display: block; border-radius: 50%; box-shadow: 0 18px 34px rgba(80, 40, 10, .22); transition: transform 4.6s cubic-bezier(.12, .7, .1, 1); }
+.wheel-num { font-size: 19px; font-weight: 800; fill: #fff; text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: rgba(0, 0, 0, .45); stroke-width: 3px; font-family: inherit; }
+.wheel-pointer { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid var(--ink); z-index: 2; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, .3)); }
+.wheel-hub { position: absolute; inset: 0; margin: auto; width: 74px; height: 74px; border-radius: 50%; border: 4px solid #fff; background: var(--btn); color: #fff; font-size: 14px; font-weight: 800; letter-spacing: .3px; box-shadow: 0 6px 16px rgba(0, 0, 0, .28); z-index: 2; }
+.wheel-hub:hover { background: var(--or-hover); }
+.wheel-hub:disabled { background: var(--icon); cursor: default; }
+.wheel-title { margin: 6px 0 10px; }
+.wheel-legend { list-style: none; display: grid; gap: 8px; margin-bottom: 4px; }
+.wheel-legend li { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; background: #fff; box-shadow: var(--shadow); }
+.wheel-legend li > span:nth-child(2) { flex: 1; min-width: 0; }
+.wheel-legend strong { display: block; font-size: 14px; }
+.wheel-legend small { display: block; font-size: 12px; color: var(--muted); }
+.wheel-legend .sw { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 800; flex-shrink: 0; text-shadow: 0 1px 2px rgba(0, 0, 0, .55); }
+.wheel-legend li.win { border: 2px solid var(--or-strong); background: var(--or-soft); }
+.wheel-legend .win-flag { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 700; color: var(--or-deep); }
+.wheel-legend .win-flag .icon { width: 14px; height: 14px; }
+.wheel-result { display: flex; align-items: center; gap: 14px; border: 1px solid var(--line-2); border-radius: 16px; background: #fff; padding: 14px 16px; margin-bottom: 18px; animation: aparecer .3s ease; }
+.wheel-result .wr-ico { width: 48px; height: 48px; border-radius: 50%; background: var(--or-soft); color: var(--or-strong); display: grid; place-items: center; flex-shrink: 0; }
+.wheel-result .wr-ico .icon { width: 26px; height: 26px; }
+.wheel-result span.k { display: block; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.wheel-result strong { display: block; font-size: 20px; line-height: 1.2; }
+.wheel-result small { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+#comparar th:first-child, #comparar td:first-child { position: sticky; left: 0; z-index: 1; }
+#comparar th:first-child { background: var(--or-soft); }
+#comparar td:first-child { background: #fff; }
+#comparar th { min-width: 92px; }
 </style>
 </head>
 
@@ -860,8 +1158,25 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
 <circle cx="74" cy="162" r="4" fill="#5f8f5a"/><circle cx="86" cy="163" r="4" fill="#e5484d"/><circle cx="154" cy="164" r="4" fill="#f6a23a"/><circle cx="166" cy="164" r="4" fill="#5f8f5a"/><circle cx="236" cy="162" r="4" fill="#e5484d"/>
 </symbol><symbol id="art-tipica" viewBox="0 0 360 220"><rect width="360" height="220" fill="#b86a3a"/><path d="M0 40h360M0 110h360M0 180h360" stroke="#a65b2e" stroke-width="22"/><circle cx="180" cy="110" r="92" fill="#fff"/><circle cx="180" cy="110" r="76" fill="#f4efe6"/><ellipse cx="150" cy="96" rx="34" ry="28" fill="#fff6dc"/><ellipse cx="216" cy="94" rx="30" ry="24" fill="#4a2c22"/><ellipse cx="212" cy="138" rx="27" ry="16" fill="#c97a3e"/><g fill="#f6b73c"><ellipse cx="146" cy="146" rx="13" ry="9"/><ellipse cx="168" cy="156" rx="13" ry="9"/></g><g fill="#5f9e4f"><circle cx="128" cy="124" r="9"/><circle cx="140" cy="132" r="8"/></g><circle cx="240" cy="116" r="7" fill="#e5484d"/></symbol>
 <symbol id="art-pizza" viewBox="0 0 360 220"><rect width="360" height="220" fill="#7a2e1d"/><circle cx="180" cy="110" r="96" fill="#d9a066"/><circle cx="180" cy="110" r="84" fill="#e3a04a"/><circle cx="180" cy="110" r="72" fill="#f6c453"/><path d="M180 38v144M108 110h144M129 59l102 102M231 59 129 161" stroke="#e3a04a" stroke-width="2"/><g fill="#c0392b"><circle cx="150" cy="80" r="11"/><circle cx="212" cy="86" r="11"/><circle cx="144" cy="130" r="11"/><circle cx="206" cy="138" r="11"/><circle cx="180" cy="108" r="11"/></g><g fill="#3f8f4a"><ellipse cx="196" cy="72" rx="8" ry="5"/><ellipse cx="162" cy="152" rx="8" ry="5"/><ellipse cx="226" cy="112" rx="8" ry="5"/></g></symbol>
-<symbol id="art-sushi" viewBox="0 0 360 220"><rect width="360" height="220" fill="#2f4a3a"/><g transform="translate(180 110) scale(.72) translate(-180 -110)"><rect x="50" y="36" width="260" height="148" rx="18" fill="#1d2626"/><g fill="#1b1b1b"><circle cx="105" cy="82" r="24"/><circle cx="160" cy="82" r="24"/><circle cx="215" cy="82" r="24"/><circle cx="270" cy="82" r="24"/></g><g fill="#fff"><circle cx="105" cy="82" r="18"/><circle cx="160" cy="82" r="18"/><circle cx="215" cy="82" r="18"/><circle cx="270" cy="82" r="18"/></g><g fill="#f26a4f"><circle cx="105" cy="82" r="7"/><circle cx="215" cy="82" r="7"/></g><g fill="#6bb46a"><circle cx="160" cy="82" r="7"/><circle cx="270" cy="82" r="7"/></g><g fill="#fff"><rect x="96" y="132" width="64" height="26" rx="13"/><rect x="190" y="132" width="64" height="26" rx="13"/></g><g fill="#f26a4f"><rect x="94" y="124" width="68" height="16" rx="8"/><rect x="188" y="124" width="68" height="16" rx="8"/></g></g></symbol></defs></svg>
+<symbol id="art-sushi" viewBox="0 0 360 220"><rect width="360" height="220" fill="#2f4a3a"/><g transform="translate(180 110) scale(.72) translate(-180 -110)"><rect x="50" y="36" width="260" height="148" rx="18" fill="#1d2626"/><g fill="#1b1b1b"><circle cx="105" cy="82" r="24"/><circle cx="160" cy="82" r="24"/><circle cx="215" cy="82" r="24"/><circle cx="270" cy="82" r="24"/></g><g fill="#fff"><circle cx="105" cy="82" r="18"/><circle cx="160" cy="82" r="18"/><circle cx="215" cy="82" r="18"/><circle cx="270" cy="82" r="18"/></g><g fill="#f26a4f"><circle cx="105" cy="82" r="7"/><circle cx="215" cy="82" r="7"/></g><g fill="#6bb46a"><circle cx="160" cy="82" r="7"/><circle cx="270" cy="82" r="7"/></g><g fill="#fff"><rect x="96" y="132" width="64" height="26" rx="13"/><rect x="190" y="132" width="64" height="26" rx="13"/></g><g fill="#f26a4f"><rect x="94" y="124" width="68" height="16" rx="8"/><rect x="188" y="124" width="68" height="16" rx="8"/></g></g></symbol>
+<filter id="f-dalt-rg" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="1 0 0 0 0  0.1628 0.7250 0.1122 0 0  0.4547 -0.6454 1.1907 0 0  0 0 0 1 0"/></filter>
+<filter id="f-dalt-tri" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.9967 -0.4840 0.4873 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/></filter>
+<symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M11 3.5 12.9 8.6 18 10.5l-5.1 1.9L11 17.5l-1.9-5.1L4 10.5l5.1-1.9Z"/><path d="M18.5 14.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8Z"/><path d="M19 2.5v4M17 4.5h4"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-type" viewBox="0 0 24 24"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></symbol>
+<symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.3A5.7 5.7 0 0 0 22 9.7C22 5.4 17.5 2 12 2Z"/><circle cx="7.5" cy="11.5" r="1.3"/><circle cx="9.5" cy="7" r="1.3"/><circle cx="14.5" cy="6.5" r="1.3"/><circle cx="18" cy="10" r="1.3"/></symbol>
+<symbol id="i-wheel" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="2"/><path d="M12 2.5V10M12 14v7.5M2.5 12H10M14 12h7.5M5.3 5.3l5.3 5.3M13.4 13.4l5.3 5.3M18.7 5.3l-5.3 5.3M10.6 13.4l-5.3 5.3"/></symbol>
+<symbol id="i-dice" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="16" cy="16" r="1.3" fill="currentColor"/></symbol>
+<symbol id="art-burger" viewBox="0 0 360 220"><rect width="360" height="220" fill="#5b3a29"/><path d="M0 40h360M0 110h360M0 180h360" stroke="#523425" stroke-width="22"/><circle cx="180" cy="114" r="92" fill="#6b4532"/><path d="M110 106a70 54 0 0 1 140 0Z" fill="#e3a04a"/><g fill="#fff6dc"><ellipse cx="150" cy="80" rx="4" ry="2.5"/><ellipse cx="180" cy="70" rx="4" ry="2.5"/><ellipse cx="210" cy="82" rx="4" ry="2.5"/><ellipse cx="166" cy="92" rx="4" ry="2.5"/><ellipse cx="196" cy="92" rx="4" ry="2.5"/></g><path d="M104 112q12 10 24 0t24 0t24 0t24 0t24 0t24 0v8H104Z" fill="#5f9e4f"/><path d="M108 120h144l-12 14H120Z" fill="#f6c453"/><rect x="106" y="126" width="148" height="22" rx="11" fill="#4a2c22"/><path d="M110 152h140a14 14 0 0 1-14 16H124a14 14 0 0 1-14-16Z" fill="#d9903e"/></symbol>
+<symbol id="art-rapida" viewBox="0 0 360 220"><rect width="360" height="220" fill="#a8322a"/><path d="M0 40h360M0 110h360M0 180h360" stroke="#962b24" stroke-width="22"/><circle cx="180" cy="114" r="92" fill="#b8473b"/><g fill="#f6c453"><rect x="134" y="48" width="14" height="76" rx="4" transform="rotate(-8 141 86)"/><rect x="152" y="38" width="14" height="86" rx="4"/><rect x="170" y="44" width="14" height="80" rx="4" transform="rotate(6 177 84)"/><rect x="188" y="36" width="14" height="88" rx="4" transform="rotate(-4 195 80)"/><rect x="206" y="48" width="14" height="76" rx="4" transform="rotate(9 213 86)"/></g><path d="M126 98h108l-14 92h-80Z" fill="#fff"/><path d="M126 98h108l-3 18H129Z" fill="#f0e3d8"/><path d="M160 150h40" stroke="#e5484d" stroke-width="8" stroke-linecap="round"/></symbol>
+<symbol id="art-otra" viewBox="0 0 360 220"><rect width="360" height="220" fill="#3d6b4f"/><path d="M0 40h360M0 110h360M0 180h360" stroke="#376247" stroke-width="22"/><circle cx="180" cy="112" r="92" fill="#4c7d5e"/><g fill="#7cc06f"><circle cx="148" cy="98" r="22"/><circle cx="182" cy="86" r="24"/><circle cx="214" cy="100" r="20"/></g><circle cx="164" cy="104" r="10" fill="#e5484d"/><circle cx="202" cy="108" r="9" fill="#f6c453"/><ellipse cx="186" cy="98" rx="12" ry="7" fill="#fff6dc"/><path d="M108 112h144a72 58 0 0 1-144 0Z" fill="#fff"/><path d="M118 112h124" stroke="#f0e3d8" stroke-width="6" stroke-linecap="round"/></symbol></defs></svg>
 
+<div class="stage">
+<div class="phone">
+<div class="phone-island" aria-hidden="true"></div>
+<div class="phone-screen">
+<div class="status-bar" aria-hidden="true"><span id="horaTelefono">9:41</span><span class="sb-icons"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 16 12" width="16" height="12"><path d="M8 11.5 5.6 8.9a3.4 3.4 0 0 1 4.8 0Z"/><path d="M3.4 6.7a6.5 6.5 0 0 1 9.2 0l-1.4 1.4a4.5 4.5 0 0 0-6.4 0Z"/><path d="M1.2 4.5a9.6 9.6 0 0 1 13.6 0l-1.4 1.4a7.6 7.6 0 0 0-10.8 0Z"/></svg><span class="sb-bat"><i></i></span></span></div>
+<div class="app-viewport">
 <div class="app">
 
     <!-- =================================
@@ -899,14 +1214,14 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
          1.1 LOGIN
     ================================== -->
 
-    <section id="login" class="screen auth"><div class="auth-hero"><div class="auth-doodles" aria-hidden="true"><svg class="icon a1" aria-hidden="true"><use href="#i-pizza"/></svg><svg class="icon a2" aria-hidden="true"><use href="#i-burger"/></svg><svg class="icon a3" aria-hidden="true"><use href="#i-heart"/></svg><svg class="icon a4" aria-hidden="true"><use href="#i-bowl"/></svg></div><button class="back" type="button" onclick="mostrarPantalla('inicio')" aria-label="Volver"><svg class="icon " aria-hidden="true"><use href="#i-arrow-left"/></svg></button><div class="auth-photo"><img class="auth-img" alt=""></div></div><div class="auth-body"><h2>Bienvenido de nuevo</h2><p class="auth-sub">Entra para seguir decidiendo dónde comer con tu grupo.</p><div class="auth-card"><label for="correoLogin">Correo electrónico</label><div class="field"><svg class="icon " aria-hidden="true"><use href="#i-mail"/></svg><input type="email" id="correoLogin" autocomplete="email" inputmode="email" placeholder="correo@ejemplo.com"></div><label for="claveLogin">Contraseña</label><div class="field"><svg class="icon " aria-hidden="true"><use href="#i-lock"/></svg><input type="password" id="claveLogin" autocomplete="current-password" placeholder="********"></div><button class="btn btn-primary" type="button" onclick="irAGrupo('login')">Ingresar <svg class="icon " aria-hidden="true"><use href="#i-arrow-right"/></svg></button></div><p class="alt-link">¿No tienes cuenta? <button class="link" type="button" onclick="mostrarPantalla('registro')">Regístrate</button></p><ul class="perks"><li><span><svg class="icon " aria-hidden="true"><use href="#i-users"/></svg></span>Crea grupos</li><li><span><svg class="icon " aria-hidden="true"><use href="#i-heart"/></svg></span>Guarda favoritos</li><li><span><svg class="icon " aria-hidden="true"><use href="#i-clock"/></svg></span>Decide en minutos</li></ul></div></section>
+    <section id="login" class="screen auth"><div class="auth-hero"><div class="auth-doodles" aria-hidden="true"><svg class="icon a1" aria-hidden="true"><use href="#i-pizza"/></svg><svg class="icon a2" aria-hidden="true"><use href="#i-burger"/></svg><svg class="icon a3" aria-hidden="true"><use href="#i-heart"/></svg><svg class="icon a4" aria-hidden="true"><use href="#i-bowl"/></svg></div><button class="back" type="button" onclick="mostrarPantalla('inicio')" aria-label="Volver"><svg class="icon " aria-hidden="true"><use href="#i-arrow-left"/></svg></button><div class="auth-photo"><img class="auth-img" alt=""></div></div><div class="auth-body"><h2>Bienvenido de nuevo</h2><p class="auth-sub">Entra para seguir decidiendo dónde comer con tu grupo.</p><div class="auth-card"><label for="correoLogin">Correo electrónico</label><div class="field"><svg class="icon " aria-hidden="true"><use href="#i-mail"/></svg><input type="email" id="correoLogin" autocomplete="email" inputmode="email" placeholder="correo@ejemplo.com"></div><label for="claveLogin">Contraseña</label><div class="field"><svg class="icon " aria-hidden="true"><use href="#i-lock"/></svg><input type="password" id="claveLogin" autocomplete="current-password" placeholder="********"></div><button class="btn btn-primary" type="button" onclick="irAGrupo('login')">Ingresar <svg class="icon " aria-hidden="true"><use href="#i-arrow-right"/></svg></button></div><p class="alt-link">¿No tienes cuenta? <button class="link" type="button" onclick="mostrarPantalla('registro')">Regístrate</button></p><ul class="perks"><li><span><svg class="icon " aria-hidden="true"><use href="#i-users"/></svg></span>Crea grupos</li><li><span><svg class="icon " aria-hidden="true"><use href="#i-sparkles"/></svg></span>Asistencia IA</li><li><span><svg class="icon " aria-hidden="true"><use href="#i-clock"/></svg></span>Decide en minutos</li></ul></div></section>
 
 
     <!-- =================================
          1.2 REGISTRO
     ================================== -->
 
-    <section id="registro" class="screen auth"><div class="auth-hero"><div class="auth-doodles" aria-hidden="true"><svg class="icon a1" aria-hidden="true"><use href="#i-pizza"/></svg><svg class="icon a2" aria-hidden="true"><use href="#i-burger"/></svg><svg class="icon a3" aria-hidden="true"><use href="#i-heart"/></svg><svg class="icon a4" aria-hidden="true"><use href="#i-bowl"/></svg></div><button class="back" type="button" onclick="mostrarPantalla('inicio')" aria-label="Volver"><svg class="icon " aria-hidden="true"><use href="#i-arrow-left"/></svg></button><div class="auth-photo"><img class="auth-img" alt=""></div></div><div class="auth-body"><h2>Crea tu cuenta</h2><p class="auth-sub">Regístrate y arma tu primer grupo en pocos minutos.</p><div class="auth-card"><label for="nombreRegistro">Nombre</label><div class="field"><svg class="icon " aria-hidden="true"><use href="#i-user"/></svg><input type="text" id="nombreRegistro" autocomplete="name" placeholder="Tu nombre"></div><label for="correoRegistro">Correo electrónico</label><div class="field"><svg class="icon " aria-hidden="true"><use href="#i-mail"/></svg><input type="email" id="correoRegistro" autocomplete="email" inputmode="email" placeholder="correo@ejemplo.com"></div><label for="claveRegistro">Contraseña</label><div class="field"><svg class="icon " aria-hidden="true"><use href="#i-lock"/></svg><input type="password" id="claveRegistro" autocomplete="new-password" placeholder="********"></div><button class="btn btn-primary" type="button" onclick="irAGrupo('registro')">Crear cuenta <svg class="icon " aria-hidden="true"><use href="#i-arrow-right"/></svg></button></div><p class="alt-link">¿Ya tienes cuenta? <button class="link" type="button" onclick="mostrarPantalla('login')">Inicia sesión</button></p><ul class="perks"><li><span><svg class="icon " aria-hidden="true"><use href="#i-users"/></svg></span>Crea grupos</li><li><span><svg class="icon " aria-hidden="true"><use href="#i-heart"/></svg></span>Guarda favoritos</li><li><span><svg class="icon " aria-hidden="true"><use href="#i-clock"/></svg></span>Decide en minutos</li></ul></div></section>
+    <section id="registro" class="screen auth"><div class="auth-hero"><div class="auth-doodles" aria-hidden="true"><svg class="icon a1" aria-hidden="true"><use href="#i-pizza"/></svg><svg class="icon a2" aria-hidden="true"><use href="#i-burger"/></svg><svg class="icon a3" aria-hidden="true"><use href="#i-heart"/></svg><svg class="icon a4" aria-hidden="true"><use href="#i-bowl"/></svg></div><button class="back" type="button" onclick="mostrarPantalla('inicio')" aria-label="Volver"><svg class="icon " aria-hidden="true"><use href="#i-arrow-left"/></svg></button><div class="auth-photo"><img class="auth-img" alt=""></div></div><div class="auth-body"><h2>Crea tu cuenta</h2><p class="auth-sub">Regístrate y arma tu primer grupo en pocos minutos.</p><div class="auth-card"><label for="nombreRegistro">Nombre</label><div class="field"><svg class="icon " aria-hidden="true"><use href="#i-user"/></svg><input type="text" id="nombreRegistro" autocomplete="name" placeholder="Tu nombre"></div><label for="correoRegistro">Correo electrónico</label><div class="field"><svg class="icon " aria-hidden="true"><use href="#i-mail"/></svg><input type="email" id="correoRegistro" autocomplete="email" inputmode="email" placeholder="correo@ejemplo.com"></div><label for="claveRegistro">Contraseña</label><div class="field"><svg class="icon " aria-hidden="true"><use href="#i-lock"/></svg><input type="password" id="claveRegistro" autocomplete="new-password" placeholder="********"></div><button class="btn btn-primary" type="button" onclick="irAGrupo('registro')">Crear cuenta <svg class="icon " aria-hidden="true"><use href="#i-arrow-right"/></svg></button></div><p class="alt-link">¿Ya tienes cuenta? <button class="link" type="button" onclick="mostrarPantalla('login')">Inicia sesión</button></p><ul class="perks"><li><span><svg class="icon " aria-hidden="true"><use href="#i-users"/></svg></span>Crea grupos</li><li><span><svg class="icon " aria-hidden="true"><use href="#i-sparkles"/></svg></span>Asistencia IA</li><li><span><svg class="icon " aria-hidden="true"><use href="#i-clock"/></svg></span>Decide en minutos</li></ul></div></section>
 
 
     <!-- =================================
@@ -988,7 +1303,25 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
 
         <button class="btn btn-secondary" type="button" onclick="mostrarFormIntegrante()"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg> Agregar integrante</button>
 
-        <div class="vote-type">
+        <div class="vote-type" id="bloqueMetodo">
+
+            <strong>Método de decisión</strong>
+
+            <p>Lo elige el administrador del grupo.</p>
+
+            <label class="check">
+                <input type="radio" name="metodoDecision" value="votacion" checked onchange="cambiarMetodo()">
+                Votación clásica: gana el lugar con más votos
+            </label>
+
+            <label class="check">
+                <input type="radio" name="metodoDecision" value="ruleta" onchange="cambiarMetodo()">
+                Ruleta: la suerte elige un lugar al azar
+            </label>
+
+        </div>
+
+        <div class="vote-type" id="bloqueTipoVotacion">
 
             <strong>Tipo de votación</strong>
 
@@ -1049,6 +1382,7 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
             <div id="temporizador" class="timer">10:00</div>
             <p id="estadoSesion">La sesión está activa. Puedes compartir el código con otras personas.</p>
         </div>
+        <div id="infoDecision" class="decision-card"></div>
         <h3>Personas dentro del grupo</h3>
         <div id="miembrosSesion"></div>
         <button class="btn btn-primary" type="button" onclick="irAPreferenciasSesion()">Dar mis preferencias</button>
@@ -1102,9 +1436,43 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
         </div>
         <div class="profile-row"><span class="row-label"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg> Mis grupos</span><strong id="totalGruposPerfil">0</strong></div>
         <div class="profile-row"><span class="row-label"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg> Lugares ganadores</span><strong id="totalGanadoresPerfil">0</strong></div>
+        <button class="btn btn-secondary" type="button" onclick="mostrarConfiguracion()"><svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg> Configuración</button>
         <button class="btn btn-secondary" type="button" onclick="mostrarHistorial()"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg> Ver mi historial</button>
         <button class="btn btn-secondary" type="button" onclick="mostrarNotificaciones()"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg> Mis notificaciones</button>
         <button class="btn btn-no" type="button" onclick="cerrarSesionUsuario()"><svg class="icon" aria-hidden="true"><use href="#i-logout"/></svg> Cerrar sesión</button>
+    </section>
+
+    <!-- CONFIGURACIÓN -->
+    <section id="configuracion" class="screen">
+        <button class="back" type="button" onclick="mostrarPerfil()" aria-label="Volver"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg></button>
+        <h2>Configuración</h2>
+
+        <div class="set-card">
+            <div class="set-head">
+                <span class="set-ico"><svg class="icon" aria-hidden="true"><use href="#i-type"/></svg></span>
+                <div><h3>Tamaño de letra</h3><p>Agranda o reduce el texto de toda la aplicación.</p></div>
+            </div>
+            <div class="seg seg-4" role="group" aria-label="Tamaño de letra">
+                <button type="button" data-letra="pequena" onclick="cambiarLetra('pequena')"><span class="aa" style="font-size:13px">A</span>Pequeña</button>
+                <button type="button" data-letra="normal" onclick="cambiarLetra('normal')"><span class="aa" style="font-size:16px">A</span>Normal</button>
+                <button type="button" data-letra="grande" onclick="cambiarLetra('grande')"><span class="aa" style="font-size:19px">A</span>Grande</button>
+                <button type="button" data-letra="muy-grande" onclick="cambiarLetra('muy-grande')"><span class="aa" style="font-size:22px">A</span>Muy grande</button>
+            </div>
+            <p class="set-preview">Vista previa: ¿Dónde comemos hoy con el grupo?</p>
+        </div>
+
+        <div class="set-card">
+            <div class="set-head">
+                <span class="set-ico"><svg class="icon" aria-hidden="true"><use href="#i-palette"/></svg></span>
+                <div><h3>Colores para daltonismo</h3><p>Elige la paleta según cómo percibes los colores. Cambia toda la aplicación.</p></div>
+            </div>
+            <label class="check cb-opt"><input type="radio" name="daltonismo" value="no" onchange="cambiarDaltonismo(this.value)"><span class="vt"><strong>Naranja, verde y rojo</strong><small>Colores originales de la app, con fondos crema.</small><span class="pal"><span><i style="background:#d9500a"></i>Principal naranja</span><span><i style="background:#1f9d5b"></i>Éxito verde</span><span><i style="background:#d93a3a"></i>Error rojo</span><span><i style="background:#f5b82e"></i>Aviso amarillo</span></span></span></label>
+            <label class="check cb-opt"><input type="radio" name="daltonismo" value="rg" onchange="cambiarDaltonismo(this.value)"><span class="vt"><strong>Azul y ámbar</strong><small>Para protanopía y deuteranopía (cuesta distinguir rojo y verde). Fondos gris azulado.</small><span class="pal"><span><i style="background:#0b5cad"></i>Principal azul</span><span><i style="background:#00796b"></i>Éxito verde azulado</span><span><i style="background:#c43e00"></i>Error bermellón</span><span><i style="background:#e69f00"></i>Aviso ámbar</span></span></span></label>
+            <label class="check cb-opt"><input type="radio" name="daltonismo" value="tri" onchange="cambiarDaltonismo(this.value)"><span class="vt"><strong>Rojo y verde azulado</strong><small>Para tritanopía (cuesta distinguir azul y amarillo). Fondos gris neutro.</small><span class="pal"><span><i style="background:#c62828"></i>Principal rojo</span><span><i style="background:#00796b"></i>Éxito verde azulado</span><span><i style="background:#7f0000"></i>Error granate</span><span><i style="background:#5d4037"></i>Aviso café</span></span></span></label>
+            <p class="set-note">En los dos modos también se corrigen los colores de fotos, ilustraciones y del mapa.</p>
+        </div>
+
+        <button class="btn btn-secondary" type="button" onclick="restablecerAjustes()"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg> Restablecer ajustes</button>
     </section>
 
     <!-- =================================
@@ -1215,7 +1583,6 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
 <div class="sug" id="iaSug"><button type="button" onclick="iaEnviar('Somos 4 estudiantes, ₡8.000 por persona, tenemos 45 minutos y uno es vegetariano')">Somos 4, ₡8.000 c/u, 45 min, 1 vegetariano</button><button type="button" onclick="iaEnviar('Queremos algo barato y rápido')">Algo barato y rápido</button></div>
 <div class="ia-form"><input id="iaInput" aria-label="Escribe tu solicitud" placeholder="Escribe lo que necesitan..." onkeydown="if(event.key==='Enter')iaEnviar()"><button type="button" onclick="iaEnviar()" aria-label="Enviar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
 </section>
-<button id="iaFab" type="button" aria-label="Abrir asistente inteligente (se puede arrastrar)" title="Asistente (arrástralo para moverlo)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12Z"/><path d="M12 8v5M9.5 10.5h5"/></svg></button>
 
     <section id="opciones" class="screen">
 
@@ -1241,6 +1608,9 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
                 <option value="tipica">Típica</option>
                 <option value="pizza">Pizza</option>
                 <option value="sushi">Sushi</option>
+                <option value="hamburguesas">Hamburguesas</option>
+                <option value="rapida">Comida rápida</option>
+                <option value="otra">Otros</option>
             </select>
             <label for="ordenar">Ordenar por</label>
             <select id="ordenar" onchange="filtrarRestaurantes()">
@@ -1254,89 +1624,9 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
         </div>
 
 
-        <!-- RESTAURANTE 1 -->
+        <p id="notaSorteo" class="sorteo-note"></p>
 
-        <div id="listaRestaurantes">
-
-        <div class="restaurant" data-nombre="Sabor Local" data-tipo="tipica">
-
-            <div class="restaurant-img">
-                <img src="img/rest-tipica.jpg" alt=""></div>
-
-            <div class="restaurant-info">
-
-                <h3>Sabor Local</h3>
-
-                <p>Comida típica</p>
-
-                <p class="meta"><svg class="icon icon-sm" aria-hidden="true"><use href="#i-star"/></svg> <strong>4.5</strong> (120)</p>
-
-                <p class="meta" title="Precio medio" aria-label="Precio medio">₡₡</p>
-
-                <p class="meta"><svg class="icon icon-sm" aria-hidden="true"><use href="#i-pin"/></svg> 1.2 km</p>
-
-                <button class="restaurant-action"
-                        onclick="mostrarPantalla('detalle')">Ver detalles</button>
-
-            </div>
-
-        </div>
-
-
-        <!-- RESTAURANTE 2 -->
-
-        <div class="restaurant" data-nombre="La Pizzería" data-tipo="pizza">
-
-            <div class="restaurant-img">
-                <img src="img/rest-pizza.jpg" alt=""></div>
-
-            <div class="restaurant-info">
-
-                <h3>La Pizzería</h3>
-
-                <p>Pizza</p>
-
-                <p class="meta"><svg class="icon icon-sm" aria-hidden="true"><use href="#i-star"/></svg> <strong>4.3</strong> (85)</p>
-
-                <p class="meta" title="Precio medio" aria-label="Precio medio">₡₡</p>
-
-                <p class="meta"><svg class="icon icon-sm" aria-hidden="true"><use href="#i-pin"/></svg> 0.8 km</p>
-
-                <button class="restaurant-action"
-                        onclick="mostrarPantalla('detallePizza')">Ver detalles</button>
-
-            </div>
-
-        </div>
-
-
-        <!-- RESTAURANTE 3 -->
-
-        <div class="restaurant" data-nombre="Sushi Time" data-tipo="sushi">
-
-            <div class="restaurant-img">
-                <img src="img/rest-sushi.jpg" alt=""></div>
-
-            <div class="restaurant-info">
-
-                <h3>Sushi Time</h3>
-
-                <p>Sushi</p>
-
-                <p class="meta"><svg class="icon icon-sm" aria-hidden="true"><use href="#i-star"/></svg> <strong>4.7</strong> (200)</p>
-
-                <p class="meta" title="Precio alto" aria-label="Precio alto">₡₡₡</p>
-
-                <p class="meta"><svg class="icon icon-sm" aria-hidden="true"><use href="#i-pin"/></svg> 1.5 km</p>
-
-                <button class="restaurant-action"
-                        onclick="mostrarPantalla('detalleSushi')">Ver detalles</button>
-
-            </div>
-
-        </div>
-
-        </div>
+        <div id="listaRestaurantes"></div>
 
         <div id="sinResultados" class="state empty" hidden>
             <div class="state-icon"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></div>
@@ -1347,120 +1637,52 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
 
 
     <!-- =================================
-         5. DETALLE SABOR LOCAL
+         5. DETALLE (se llena con el lugar elegido)
     ================================== -->
 
     <section id="detalle" class="screen">
 
         <button class="back" onclick="mostrarPantalla('opciones')" aria-label="Volver"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg></button>
 
-        <div class="detail-image"><img src="img/rest-tipica.jpg" alt="Foto del restaurante"></div>
+        <div class="detail-image"><svg class="thumb-art" viewBox="0 0 360 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use id="detalleArte" href="#art-tipica"/></svg></div>
 
-        <h2>Sabor Local</h2>
+        <h2 id="detalleNombre">Sabor Local</h2>
 
-        <p>Comida típica</p>
+        <p id="detalleComida">Comida típica</p>
 
         <div class="detail-info">
 
             <div class="detail-row">
-                <svg class="icon" aria-hidden="true"><use href="#i-star"/></svg> <strong>4.5</strong> (120 reseñas)
+                <svg class="icon" aria-hidden="true"><use href="#i-star"/></svg> <span><strong id="detalleRating">4.5</strong> (<span id="detalleResenas">120</span> reseñas)</span>
             </div>
 
             <div class="detail-row">
-                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> 1.2 km
+                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> <span id="detalleKm">1.2 km</span>
             </div>
 
             <div class="detail-row">
-                <svg class="icon" aria-hidden="true"><use href="#i-cash"/></svg> ₡₡ Precio aproximado
+                <svg class="icon" aria-hidden="true"><use href="#i-cash"/></svg> <span><span id="detallePrecio">₡₡</span> Precio aproximado</span>
             </div>
 
             <div class="detail-row">
-                <svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg> Lun - Dom: 11:00 a.m. - 9:00 p.m.
+                <svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg> <span id="detalleHorario">Lun - Dom: 11:00 a.m. - 9:00 p.m.</span>
+            </div>
+
+            <div class="detail-row">
+                <svg class="icon" aria-hidden="true"><use href="#i-leaf"/></svg> <span id="detalleDieta">Opciones vegetariano</span>
             </div>
 
         </div>
 
         <h3>Información</h3>
 
-        <p>
+        <p id="detalleDescripcion">
             Restaurante con diferentes opciones de comida
             para compartir en grupo.
         </p>
 
         <button class="btn btn-primary"
-                onclick="agregarComparar('Sabor Local')">Agregar a comparar</button>
-
-    </section>
-
-
-    <!-- =================================
-         DETALLE PIZZERÍA
-    ================================== -->
-
-    <section id="detallePizza" class="screen">
-
-        <button class="back" onclick="mostrarPantalla('opciones')" aria-label="Volver"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg></button>
-
-        <div class="detail-image"><img src="img/banner-pizza.jpg" alt="Foto del restaurante"></div>
-
-        <h2>La Pizzería</h2>
-
-        <p>Pizza</p>
-
-        <div class="detail-info">
-
-            <div class="detail-row">
-                <svg class="icon" aria-hidden="true"><use href="#i-star"/></svg> <strong>4.3</strong> (85 reseñas)
-            </div>
-
-            <div class="detail-row">
-                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> 0.8 km
-            </div>
-
-            <div class="detail-row">
-                <svg class="icon" aria-hidden="true"><use href="#i-cash"/></svg> ₡₡ Precio aproximado
-            </div>
-
-        </div>
-
-        <button class="btn btn-primary"
-                onclick="agregarComparar('La Pizzería')">Agregar a comparar</button>
-
-    </section>
-
-
-    <!-- =================================
-         DETALLE SUSHI
-    ================================== -->
-
-    <section id="detalleSushi" class="screen">
-
-        <button class="back" onclick="mostrarPantalla('opciones')" aria-label="Volver"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg></button>
-
-        <div class="detail-image"><img src="img/rest-sushi.jpg" alt="Foto del restaurante"></div>
-
-        <h2>Sushi Time</h2>
-
-        <p>Sushi</p>
-
-        <div class="detail-info">
-
-            <div class="detail-row">
-                <svg class="icon" aria-hidden="true"><use href="#i-star"/></svg> <strong>4.7</strong> (200 reseñas)
-            </div>
-
-            <div class="detail-row">
-                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> 1.5 km
-            </div>
-
-            <div class="detail-row">
-                <svg class="icon" aria-hidden="true"><use href="#i-cash"/></svg> ₡₡₡ Precio aproximado
-            </div>
-
-        </div>
-
-        <button class="btn btn-primary"
-                onclick="agregarComparar('Sushi Time')">Agregar a comparar</button>
+                onclick="agregarComparar(document.getElementById('detalleNombre').textContent)">Agregar a comparar</button>
 
     </section>
 
@@ -1479,48 +1701,9 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
 
             <table>
 
-                <thead>
+                <thead id="compararHead"></thead>
 
-                    <tr>
-                        <th>Característica</th>
-                        <th>Sabor Local</th>
-                        <th>La Pizzería</th>
-                        <th>Sushi Time</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    <tr>
-                        <td>Comida</td>
-                        <td>Típica</td>
-                        <td>Pizza</td>
-                        <td>Sushi</td>
-                    </tr>
-
-                    <tr>
-                        <td>Precio</td>
-                        <td>₡₡</td>
-                        <td>₡₡</td>
-                        <td>₡₡₡</td>
-                    </tr>
-
-                    <tr>
-                        <td>Distancia</td>
-                        <td>1.2 km</td>
-                        <td>0.8 km</td>
-                        <td>1.5 km</td>
-                    </tr>
-
-                    <tr>
-                        <td>Calificación</td>
-                        <td>4.5</td>
-                        <td>4.3</td>
-                        <td>4.7</td>
-                    </tr>
-
-                </tbody>
+                <tbody id="compararBody"></tbody>
 
             </table>
 
@@ -1544,49 +1727,7 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
 
         <p id="modoVotacionNota" class="subtitle"></p>
 
-        <div class="vote-option" onclick="seleccionarVoto(this)">
-
-            <label>
-                <input type="radio"
-                       name="restaurant"
-                       value="Sabor Local">
-
-                <strong>Sabor Local</strong>
-
-                <p>₡₡ · 1.2 km</p>
-            </label>
-
-        </div>
-
-
-        <div class="vote-option" onclick="seleccionarVoto(this)">
-
-            <label>
-                <input type="radio"
-                       name="restaurant"
-                       value="La Pizzería">
-
-                <strong>La Pizzería</strong>
-
-                <p>₡₡ · 0.8 km</p>
-            </label>
-
-        </div>
-
-
-        <div class="vote-option" onclick="seleccionarVoto(this)">
-
-            <label>
-                <input type="radio"
-                       name="restaurant"
-                       value="Sushi Time">
-
-                <strong>Sushi Time</strong>
-
-                <p>₡₡₡ · 1.5 km</p>
-            </label>
-
-        </div>
+        <div id="opcionesVoto"></div>
 
 
         <button class="btn btn-primary"
@@ -1626,6 +1767,37 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
             <button class="btn btn-primary" type="button" onclick="mostrarPantalla('confirmacion')">Confirmar elección</button>
             <button class="btn btn-secondary" type="button" onclick="mostrarPantalla('votacion')">Volver a votar</button>
         </div>
+
+    </section>
+
+
+    <!-- =================================
+         8.1 RULETA (empate o método por ruleta)
+    ================================== -->
+
+    <section id="ruleta" class="screen">
+
+        <button class="back" type="button" onclick="volverDeRuleta()" aria-label="Volver"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg></button>
+
+        <h2 id="tituloRuleta">Ruleta</h2>
+
+        <p id="ruletaNota" class="ruleta-nota"></p>
+
+        <div class="wheel-wrap">
+            <span class="wheel-pointer" aria-hidden="true"></span>
+            <svg id="ruletaRueda" class="wheel" viewBox="-100 -100 200 200" role="img" aria-label="Ruleta con los lugares participantes"></svg>
+            <button id="ruletaCentro" class="wheel-hub" type="button" onclick="girarRuleta()">Girar</button>
+        </div>
+
+        <p id="ruletaBloqueo" class="lock-note" role="status" hidden></p>
+
+        <div id="ruletaResultado" class="wheel-result" role="status" aria-live="polite" hidden></div>
+
+        <h3 class="section-title wheel-title">Participan</h3>
+        <ul id="ruletaLeyenda" class="wheel-legend"></ul>
+
+        <button id="btnGirar" class="btn btn-primary" type="button" onclick="girarRuleta()"><svg class="icon" aria-hidden="true"><use href="#i-wheel"/></svg> Girar la ruleta</button>
+        <button id="btnConfirmarRuleta" class="btn btn-primary" type="button" onclick="mostrarPantalla('confirmacion')" hidden>Confirmar elección</button>
 
     </section>
 
@@ -1693,8 +1865,10 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
     </section>
 
 </div>
+<div class="scroll-ind" id="scrollInd" aria-hidden="true"></div>
+</div>
 
-
+<button id="iaFab" type="button" aria-label="Abrir asistente inteligente (se puede arrastrar)" title="Asistente (arrástralo para moverlo)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12Z"/><path d="M12 8v5M9.5 10.5h5"/></svg></button>
 
 <div class="toast" id="toast" role="status" aria-live="polite"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><span></span></div>
 
@@ -1712,6 +1886,10 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
         <span class="nav-icon"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg></span><span>Perfil</span>
     </button>
 </nav>
+<div class="home-indicator" aria-hidden="true"></div>
+</div>
+</div>
+</div>
 
 <script>
 
@@ -1747,20 +1925,82 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
         "ABC123": { nombre: "Almuerzo del viernes", miembros: ["Naila", "Carlos", "María"], duracion: 600, segundosRestantes: 600, tipo: "publica", cerrado: false, resultadoGuardado: false }
     };
 
-    const lugares = {
-        "Sabor Local": {
-            comida: "Comida típica",
-            detalle: "₡₡ · 1.2 km"
-        },
-        "La Pizzería": {
-            comida: "Pizza",
-            detalle: "₡₡ · 0.8 km"
-        },
-        "Sushi Time": {
-            comida: "Sushi",
-            detalle: "₡₡₡ · 1.5 km"
-        }
-    };
+    /* =================================
+       BANCO DE LUGARES
+       Cada grupo recibe tantos lugares como participantes tenga.
+       Al conocer los gustos (tipo de comida, presupuesto, dieta) se priorizan los que coinciden.
+       (Datos locales: no hay servidor.)
+    ================================== */
+
+    const bancoLugares = [
+        { nombre: "Sabor Local", tipo: "tipica", comida: "Comida típica", precio: 2, km: 1.2, rating: 4.5, resenas: 120, dieta: ["vegetariano"],
+          horario: "Lun - Dom: 11:00 a.m. - 9:00 p.m.", descripcion: "Restaurante con diferentes opciones de comida para compartir en grupo." },
+        { nombre: "La Pizzería", tipo: "pizza", comida: "Pizza", precio: 2, km: 0.8, rating: 4.3, resenas: 85, dieta: ["vegetariano"],
+          horario: "Mar - Dom: 12:00 m.d. - 10:00 p.m.", descripcion: "Pizzas artesanales al horno, ideales para compartir." },
+        { nombre: "Sushi Time", tipo: "sushi", comida: "Sushi", precio: 3, km: 1.5, rating: 4.7, resenas: 200, dieta: [],
+          horario: "Lun - Sáb: 12:00 m.d. - 10:00 p.m.", descripcion: "Rollos, nigiris y combos pensados para grupos." },
+        { nombre: "Soda Doña Mary", tipo: "tipica", comida: "Comida típica", precio: 1, km: 0.5, rating: 4.6, resenas: 310, dieta: ["vegetariano", "sin-gluten"],
+          horario: "Lun - Sáb: 6:00 a.m. - 4:00 p.m.", descripcion: "Casados, gallo pinto y refrescos naturales a buen precio." },
+        { nombre: "El Fogón Nicoyano", tipo: "tipica", comida: "Comida típica", precio: 2, km: 2.1, rating: 4.4, resenas: 96, dieta: ["sin-gluten"],
+          horario: "Todos los días: 10:00 a.m. - 9:00 p.m.", descripcion: "Cocina guanacasteca a la leña: arroz de maíz, tortillas palmeadas y más." },
+        { nombre: "Napoli Express", tipo: "pizza", comida: "Pizza", precio: 1, km: 1.0, rating: 4.0, resenas: 64, dieta: [],
+          horario: "Todos los días: 11:00 a.m. - 11:00 p.m.", descripcion: "Porciones grandes y promociones para grupos." },
+        { nombre: "Forno di Pietra", tipo: "pizza", comida: "Pizza", precio: 3, km: 2.4, rating: 4.8, resenas: 140, dieta: ["vegetariano", "sin-gluten"],
+          horario: "Mié - Dom: 5:00 p.m. - 10:00 p.m.", descripcion: "Pizzería italiana con horno de piedra, opciones vegetarianas y masa sin gluten." },
+        { nombre: "Sakura Roll", tipo: "sushi", comida: "Sushi", precio: 2, km: 1.8, rating: 4.2, resenas: 77, dieta: ["vegetariano", "sin-gluten"],
+          horario: "Mar - Dom: 12:00 m.d. - 9:00 p.m.", descripcion: "Sushi y poke bowls, con rollos vegetarianos y opciones sin gluten." },
+        { nombre: "Burger Barrio", tipo: "hamburguesas", comida: "Hamburguesas", precio: 2, km: 0.9, rating: 4.5, resenas: 188, dieta: [],
+          horario: "Todos los días: 12:00 m.d. - 10:00 p.m.", descripcion: "Hamburguesas artesanales y papas caseras." },
+        { nombre: "La Parrilla Burger", tipo: "hamburguesas", comida: "Hamburguesas", precio: 3, km: 1.6, rating: 4.6, resenas: 102, dieta: ["vegetariano"],
+          horario: "Jue - Dom: 5:00 p.m. - 11:00 p.m.", descripcion: "Hamburguesas a la parrilla y opciones vegetarianas." },
+        { nombre: "Pollo Express", tipo: "rapida", comida: "Comida rápida", precio: 1, km: 0.4, rating: 3.9, resenas: 230, dieta: [],
+          horario: "Todos los días: 10:00 a.m. - 10:00 p.m.", descripcion: "Pollo frito, combos y servicio para llevar en minutos." },
+        { nombre: "Taco Loco", tipo: "rapida", comida: "Comida rápida", precio: 1, km: 1.1, rating: 4.3, resenas: 154, dieta: ["vegetariano", "sin-gluten"],
+          horario: "Lun - Sáb: 11:00 a.m. - 9:00 p.m.", descripcion: "Tacos en tortilla de maíz, burritos y nachos para compartir." },
+        { nombre: "Café Colonial", tipo: "otra", comida: "Cafetería", precio: 2, km: 0.7, rating: 4.4, resenas: 89, dieta: ["vegetariano"],
+          horario: "Lun - Dom: 7:00 a.m. - 7:00 p.m.", descripcion: "Café de la zona, repostería y desayunos." },
+        { nombre: "Verde Bowl", tipo: "otra", comida: "Vegetariana", precio: 2, km: 1.3, rating: 4.7, resenas: 66, dieta: ["vegetariano", "sin-gluten"],
+          horario: "Lun - Vie: 9:00 a.m. - 6:00 p.m.", descripcion: "Bowls, ensaladas y jugos, con opciones veganas y sin gluten." },
+        { nombre: "Marisquería El Puerto", tipo: "otra", comida: "Mariscos", precio: 3, km: 3.0, rating: 4.5, resenas: 118, dieta: ["sin-gluten"],
+          horario: "Todos los días: 11:00 a.m. - 9:00 p.m.", descripcion: "Ceviches, arroz con camarones y pescado fresco." }
+    ];
+
+    const lugares = {};
+    bancoLugares.forEach(l => {
+        lugares[l.nombre] = { comida: l.comida, detalle: "₡".repeat(l.precio) + " · " + l.km.toFixed(1) + " km" };
+    });
+
+    function datosLugar(nombre) {
+        return bancoLugares.find(l => l.nombre === nombre) || bancoLugares[0];
+    }
+
+    // Un lugar por participante (mínimo 2 para poder elegir, máximo el tamaño del banco).
+    // Sin gustos el orden es al azar; con gustos, cada lugar suma puntos según coincida
+    // y un poco de azar desempata entre lugares parecidos.
+    function sortearLugares(cantidad, gustos) {
+        const total = Math.min(Math.max(cantidad, 2), bancoLugares.length);
+        const puntaje = l => {
+            if (!gustos) return 0;
+            let p = 0;
+            if (gustos.tipos.includes(l.tipo)) p += 4;
+            p += gustos.otrosTipos[l.tipo] || 0;
+            if (gustos.precioMax && l.precio <= gustos.precioMax) p += 1;
+            if (gustos.cerca && l.km <= 1.2) p += 1;
+            gustos.dieta.forEach(d => { p += l.dieta.includes(d) ? 1 : -3; });
+            return p;
+        };
+        return bancoLugares
+            .map(l => ({ nombre: l.nombre, orden: puntaje(l) + Math.random() * 1.5 }))
+            .sort((a, b) => b.orden - a.orden)
+            .slice(0, total)
+            .map(x => x.nombre);
+    }
+
+    function lugaresSesion() {
+        const grupo = gruposGuardados[codigoGrupoActual];
+        return grupo && grupo.lugares ? grupo.lugares : ["Sabor Local", "La Pizzería", "Sushi Time"];
+    }
+
 
     function mostrarPantalla(id) {
         const pantallas = document.querySelectorAll(".screen");
@@ -1776,12 +2016,12 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
         const nav = document.getElementById("appNav");
         const pantallasPrivadas = ["grupo", "crearGrupo", "codigoGrupo", "sesionGrupo", "eleccionesGrupo", "preferencias",
             "explorar", "mapa", "recomendaciones", "detalleLugar", "votar", "resultado", "confirmacion",
-            "historial", "notificaciones", "perfil"];
+            "historial", "notificaciones", "perfil", "configuracion"];
         if (nav) nav.style.display = pantallasPrivadas.includes(id) ? "flex" : "none";
 
         document.querySelectorAll(".app-nav button").forEach(b => b.classList.remove("active"));
         const activeMap = {grupo:"navGrupo", crearGrupo:"navGrupo", codigoGrupo:"navGrupo", sesionGrupo:"navGrupo", eleccionesGrupo:"navGrupo",
-            preferencias:"navGrupo", historial:"navHistorial", notificaciones:"navNotificaciones", perfil:"navPerfil"};
+            preferencias:"navGrupo", historial:"navHistorial", notificaciones:"navNotificaciones", perfil:"navPerfil", configuracion:"navPerfil"};
         const activeButton = document.getElementById(activeMap[id] || "");
         if (activeButton) activeButton.classList.add("active");
     }
@@ -2121,7 +2361,8 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
 
         }
 
-        const opciones = Object.keys(lugares);
+        const opciones = lugaresSesion();
+        const grupo = gruposGuardados[codigoGrupoActual];
         const votos = {};
 
         opciones.forEach(lugar => {
@@ -2130,10 +2371,15 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
 
         votos[opcion.value].push(nombreUsuario);
 
-        nombresIntegrantes()
+        // Demostración: el voto de cada integrante se sortea una sola vez por grupo y se conserva.
+        const simulados = grupo ? (grupo.votosSimulados = grupo.votosSimulados || {}) : {};
+        (grupo ? grupo.miembros : nombresIntegrantes())
             .filter(nombre => nombre !== nombreUsuario)
-            .forEach((nombre, indice) => {
-                votos[opciones[indice % opciones.length]].push(nombre);
+            .forEach(nombre => {
+                if (!opciones.includes(simulados[nombre])) {
+                    simulados[nombre] = opciones[Math.floor(Math.random() * opciones.length)];
+                }
+                votos[simulados[nombre]].push(nombre);
             });
 
         ultimosVotos = votos;
@@ -2510,11 +2756,8 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
 /* ===== NUEVAS FUNCIONES (parche aditivo: no modifica las funciones existentes) ===== */
 (function () {
     const ico = id => '<svg class="icon" aria-hidden="true"><use href="#' + id + '"/></svg>';
-    const DATOS = {
-        "Sabor Local": { tipo: "tipica", rating: 4.5, km: 1.2, precio: 2 },
-        "La Pizzería": { tipo: "pizza", rating: 4.3, km: 0.8, precio: 2 },
-        "Sushi Time":  { tipo: "sushi", rating: 4.7, km: 1.5, precio: 3 }
-    };
+    const DATOS = {};
+    bancoLugares.forEach(l => { DATOS[l.nombre] = { tipo: l.tipo, rating: l.rating, km: l.km, precio: l.precio }; });
     const KEY_FAV = "dondeComemosFavoritos";
     let favs = []; try { favs = JSON.parse(localStorage.getItem(KEY_FAV) || "[]"); } catch (e) {}
 
@@ -2548,7 +2791,7 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
     function crearCorazon(nombre) {
         const b = document.createElement("button");
         b.type = "button"; b.className = "heart"; b.dataset.nombre = nombre; b.innerHTML = ico("i-heart");
-        b.addEventListener("click", ev => { ev.stopPropagation(); alternarFavorito(nombre); });
+        b.addEventListener("click", ev => { ev.stopPropagation(); alternarFavorito(b.dataset.nombre); });
         return b;
     }
     document.querySelectorAll("#listaRestaurantes .restaurant").forEach((c, i) => {
@@ -2560,9 +2803,10 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
         if (t && DATOS[t.textContent.trim()]) box.appendChild(crearCorazon(t.textContent.trim()));
     });
     pintarCorazones();
+    window.crearCorazon = crearCorazon; window.pintarCorazones = pintarCorazones;
 
     /* 3. Compatibilidad con tus preferencias */
-    const TIPO_CHIP = { "Pizza": "pizza", "Sushi": "sushi", "Típica": "tipica" };
+    const TIPO_CHIP = { "Pizza": "pizza", "Sushi": "sushi", "Típica": "tipica", "Hamburguesas": "hamburguesas", "Comida rápida": "rapida", "Otra": "otra" };
     const PRESUP = ["₡0 - ₡5.000", "₡5.000 - ₡10.000", "₡10.000 - ₡15.000", "Más de ₡15.000"];
     function calcularMatch(d) {
         const p = prefsDeUsuario(); if (!p) return null;
@@ -2582,6 +2826,7 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
         });
         filtrarRestaurantes();
     }
+    window.actualizarMatch = actualizarMatch;
     const _buscar = buscarOpciones;
     buscarOpciones = function () {
         _buscar();
@@ -2692,8 +2937,8 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
     };
     function pintarRecientes(h) {
         h = unicos(h);
-        const fav = leer("dondeComemosFavoritos").length, fila = document.getElementById("statRow");
-        fila.innerHTML = [["i-users", "Grupos", h.length, "mostrarHistorial()", "stat-or"], ["i-trophy", "Ganadores", h.filter(x => x.ganador).length, "mostrarHistorial()", "stat-am"], ["i-heart", "Favoritos", fav, "verFavoritos()", "stat-rd"]]
+        const fila = document.getElementById("statRow");
+        fila.innerHTML = [["i-users", "Grupos", h.length, "mostrarHistorial()", "stat-or"], ["i-trophy", "Ganadores", h.filter(x => x.ganador).length, "mostrarHistorial()", "stat-am"]]
             .map(([i, l, n, f, c]) => '<button type="button" class="stat ' + c + '" onclick="' + f + '"><span class="stat-ico">' + ico(i) + '</span><strong>' + n + '</strong><span class="stat-lbl">' + l + '</span></button>').join("");
         fila.hidden = false;
         const E = { act: ["Activo", "pill-act", "i-clock"], fin: ["Finalizado", "pill-fin", "i-trophy"], exp: ["Expirado", "pill-exp", "i-clock"] };
@@ -2802,7 +3047,7 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
     document.querySelectorAll(".auth-photo").forEach(f => { f.innerHTML = '<img class="auth-img" alt="" src="' + foto.src + '">'; });
     const ico = n => '<svg class="icon" aria-hidden="true"><use href="#' + n + '"/></svg>';
     document.querySelectorAll(".screen").forEach(s => {
-        if (["inicio", "login", "registro", "grupo", "confirmacion", "detalle", "detallePizza", "detalleSushi", "mapa"].includes(s.id)) return;
+        if (["inicio", "login", "registro", "grupo", "confirmacion", "detalle", "mapa"].includes(s.id)) return;
         const back = s.querySelector(":scope > .back"), h2 = s.querySelector(":scope > h2");
         if (!back || !h2) return;
         const head = document.createElement("header"), fila = document.createElement("div");
@@ -2811,7 +3056,7 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
         s.querySelectorAll(":scope > .step-label, :scope > .step-bar").forEach(x => head.append(x));
         s.classList.add("has-head");
     });
-    ["detalle", "detallePizza", "detalleSushi"].forEach(id => {
+    ["detalle"].forEach(id => {
         const s = document.getElementById(id), img = s.querySelector(".detail-image"), back = s.querySelector(".back");
         if (img && back) { img.append(back); s.classList.add("has-cover"); }
     });
@@ -2916,9 +3161,7 @@ label.check:has(input[name="restriccion"]){display:inline-flex;margin:4px 6px 4p
 </script>
 <script>
 (function(){
-const R=[{n:"Sabor Local",t:"Comida típica",lv:2,km:1.2,r:4.5,rv:120},
-{n:"La Pizzería",t:"Pizza",lv:2,km:0.8,r:4.3,rv:85},
-{n:"Sushi Time",t:"Sushi",lv:3,km:1.5,r:4.7,rv:200}];
+const R=()=>lugaresSesion().map(datosLugar).map(l=>({n:l.nombre,t:l.comida,lv:l.precio,km:l.km,r:l.rating,rv:l.resenas}));
 let C={},prev;
 const log=()=>document.getElementById("iaLog");
 function add(cls,h){const d=document.createElement("div");d.className="msg "+cls;d.innerHTML=h;log().appendChild(d);d.scrollIntoView({block:"start"});return d}
@@ -2942,7 +3185,7 @@ if(!C.presupuesto){add("bot","Entendí esto:"+chips()+"Me falta el <b>presupuest
 let nota=(C.alergia?'<p class="why"><b>Importante:</b> las alergias no puedo garantizarlas: deben confirmarse directamente con el restaurante.</p>':"");
 add("bot","Esto es lo que entendí. ¿Es correcto?"+chips()+nota+confirmBtns())};
 window.iaBuscar=function(){const d=add("bot typing","Buscando restaurantes con tus criterios…");
-setTimeout(()=>{d.remove();const rs=R.map(r=>{let e=[];r.min=Math.round(r.km*12);const mx=C.presupuesto<=5000?1:C.presupuesto<=10000?2:3;if(C.presupuesto&&r.lv>mx)e.push(["bad","Excede el presupuesto","Su precio es "+"₡".repeat(r.lv)+" y tu presupuesto de "+fmt(C.presupuesto)+" admite hasta "+"₡".repeat(mx)+"."]);
+setTimeout(()=>{d.remove();const rs=R().map(r=>{let e=[];r.min=Math.round(r.km*12);const mx=C.presupuesto<=5000?1:C.presupuesto<=10000?2:3;if(C.presupuesto&&r.lv>mx)e.push(["bad","Excede el presupuesto","Su precio es "+"₡".repeat(r.lv)+" y tu presupuesto de "+fmt(C.presupuesto)+" admite hasta "+"₡".repeat(mx)+"."]);
 if(C.tiempo&&r.min>C.tiempo/3)e.push(["warn","Tiempo ajustado","Queda a "+r.min+" min y tienen "+C.tiempo+"."]);
 if(C.veg)e.push(["warn","Sin confirmar","La app no tiene información alimentaria de este lugar. Confirma la opción vegetariana con el restaurante."]);
 if(!e.some(x=>x[0]==="bad"))e.unshift(["ok","Cumple tu presupuesto","Precio "+"₡".repeat(r.lv)+" · ★ "+r.r+" ("+r.rv+" reseñas) · "+r.km+" km (≈"+r.min+" min a pie)."]);return{r,e}});
@@ -2957,13 +3200,472 @@ document.querySelectorAll('input[name="restriccion"]').forEach(x=>{x.checked=(x.
 const u=document.getElementById("ubicacion");if(!u.value)u.selectedIndex=1;const ch=document.querySelector("#preferencias .chip");if(ch&&!document.querySelector("#preferencias .chip.selected"))ch.classList.add("selected");
 mostrarPantalla("preferencias");avisar("Pasé tus criterios a los filtros. Puedes ajustarlos y buscar.")};
 window.iaCerrar=function(){mostrarPantalla(prev||"inicio")};window.iaAbrir=function(){const a=document.querySelector(".screen.active");if(a&&a.id!=="asistente")prev=a.id;if(!log().children.length)add("bot","Hola. Soy el asistente de ¿Dónde comemos?. Escribe presupuesto, tiempo, personas y restricciones, o toca un ejemplo.");mostrarPantalla("asistente")};
-const fab=document.getElementById("iaFab");let drag=null,moved=false;
-function place(x,y){x=Math.min(Math.max(4,x),innerWidth-48);y=Math.min(Math.max(4,y),innerHeight-48);fab.style.left=x+"px";fab.style.top=y+"px";fab.style.right="auto";fab.style.bottom="auto"}
-try{const s=JSON.parse(localStorage.getItem("iaFabPos")||"null");if(s)place(s.x,s.y)}catch(e){}
-fab.addEventListener("pointerdown",e=>{const r=fab.getBoundingClientRect();drag={dx:e.clientX-r.left,dy:e.clientY-r.top,sx:e.clientX,sy:e.clientY};moved=false;try{fab.setPointerCapture(e.pointerId)}catch(_){}});
-fab.addEventListener("pointermove",e=>{if(!drag)return;if(Math.abs(e.clientX-drag.sx)+Math.abs(e.clientY-drag.sy)>6)moved=true;if(moved)place(e.clientX-drag.dx,e.clientY-drag.dy)});
-fab.addEventListener("pointerup",()=>{if(drag&&moved){try{localStorage.setItem("iaFabPos",JSON.stringify({x:parseFloat(fab.style.left),y:parseFloat(fab.style.top)}))}catch(e){}}drag=null});
+const fab=document.getElementById("iaFab"),marco=fab.parentElement;let drag=null,moved=false;
+const escala=()=>marco.getBoundingClientRect().width/marco.offsetWidth||1;
+function place(x,y){x=Math.min(Math.max(4,x),marco.clientWidth-48);y=Math.min(Math.max(4,y),marco.clientHeight-48);fab.style.left=x+"px";fab.style.top=y+"px";fab.style.right="auto";fab.style.bottom="auto"}
+try{const s=JSON.parse(localStorage.getItem("iaFabPos2")||"null");if(s)place(s.x,s.y)}catch(e){}
+fab.addEventListener("pointerdown",e=>{const r=fab.getBoundingClientRect(),k=escala();drag={dx:(e.clientX-r.left)/k,dy:(e.clientY-r.top)/k,sx:e.clientX,sy:e.clientY};moved=false;try{fab.setPointerCapture(e.pointerId)}catch(_){}});
+fab.addEventListener("pointermove",e=>{if(!drag)return;if(Math.abs(e.clientX-drag.sx)+Math.abs(e.clientY-drag.sy)>6)moved=true;if(moved){const m=marco.getBoundingClientRect(),k=escala();place((e.clientX-m.left)/k-drag.dx,(e.clientY-m.top)/k-drag.dy)}});
+fab.addEventListener("pointerup",()=>{if(drag&&moved){try{localStorage.setItem("iaFabPos2",JSON.stringify({x:parseFloat(fab.style.left),y:parseFloat(fab.style.top)}))}catch(e){}}drag=null});
 fab.addEventListener("click",()=>{if(moved){moved=false;return}iaAbrir()});
+})();
+</script>
+<script>
+/* ===== Teléfono, banco de lugares, ruleta y configuración ===== */
+(function () {
+    const ico = id => '<svg class="icon" aria-hidden="true"><use href="#' + id + '"/></svg>';
+    const icoSm = id => '<svg class="icon icon-sm" aria-hidden="true"><use href="#' + id + '"/></svg>';
+    const ARTE = { tipica: "art-tipica", pizza: "art-pizza", sushi: "art-sushi", hamburguesas: "art-burger", rapida: "art-rapida", otra: "art-otra" };
+    const arte = tipo => '<svg class="thumb-art" viewBox="0 0 360 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#' + (ARTE[tipo] || "art-tipica") + '"/></svg>';
+    const precio = l => "₡".repeat(l.precio);
+    const km = l => l.km.toFixed(1) + " km";
+    const unir = arr => arr.length > 1 ? arr.slice(0, -1).join(", ") + " y " + arr[arr.length - 1] : (arr[0] || "");
+    const reloj2 = s => String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+    const DIETA = { vegetariano: "vegetariano", "sin-gluten": "sin gluten" };
+
+    /* ---------- 1. Teléfono: escala para que quepa en la ventana y reloj ---------- */
+    function ajustarTelefono() {
+        const s = matchMedia("(max-width: 520px)").matches ? 1 : Math.min(1, (innerHeight - 32) / 872, (innerWidth - 32) / 430);
+        document.documentElement.style.setProperty("--phone-scale", s.toFixed(3));
+    }
+    addEventListener("resize", ajustarTelefono);
+    ajustarTelefono();
+    function reloj() { const d = new Date(); document.getElementById("horaTelefono").textContent = d.getHours() + ":" + String(d.getMinutes()).padStart(2, "0"); }
+    reloj(); setInterval(reloj, 15000);
+
+    /* Indicador de scroll propio: la barra nativa se oculta y esta se dibuja dentro de la pantalla,
+       por encima de la barra inferior y lejos de las esquinas redondeadas. */
+    const indicador = document.getElementById("scrollInd"), vista = indicador.parentElement;
+    let ocultarIndicador = null;
+    function pintarIndicador(mostrar) {
+        const s = document.querySelector(".screen.active");
+        const max = s ? s.scrollHeight - s.clientHeight : 0;
+        if (max <= 2) { indicador.classList.remove("on"); return; }
+        const nav = document.getElementById("appNav");
+        const arriba = 8, abajo = nav.style.display === "flex" ? nav.offsetHeight + 8 : 44;
+        const pista = vista.clientHeight - arriba - abajo;
+        const alto = Math.max(36, pista * s.clientHeight / s.scrollHeight);
+        indicador.style.height = alto + "px";
+        indicador.style.transform = "translateY(" + (arriba + (pista - alto) * s.scrollTop / max) + "px)";
+        if (mostrar) {
+            indicador.classList.add("on");
+            clearTimeout(ocultarIndicador);
+            ocultarIndicador = setTimeout(() => indicador.classList.remove("on"), 900);
+        }
+    }
+    document.querySelector(".app").addEventListener("scroll", e => {
+        if (e.target.classList && e.target.classList.contains("screen")) pintarIndicador(true);
+    }, true);
+
+    // Cada pantalla tiene su propio scroll: al cambiar de pantalla vuelve arriba
+    const _mp = mostrarPantalla;
+    mostrarPantalla = function (id) {
+        _mp(id);
+        const a = document.querySelector(".screen.active");
+        if (a) a.scrollTop = 0;
+        indicador.classList.remove("on");
+    };
+    addEventListener("popstate", () => setTimeout(() => { const a = document.querySelector(".screen.active"); if (a) a.scrollTop = 0; }));
+
+    /* ---------- 2. Lugares del grupo (banco de lugares + gustos) ---------- */
+    const TIPO_GUSTO = { "Pizza": "pizza", "Sushi": "sushi", "Hamburguesas": "hamburguesas", "Típica": "tipica", "Comida rápida": "rapida", "Otra": "otra" };
+    const PRESUPUESTOS = ["₡0 - ₡5.000", "₡5.000 - ₡10.000", "₡10.000 - ₡15.000", "Más de ₡15.000"];
+
+    // Tus gustos pesan más; los de los demás integrantes (de demostración) suman un poco.
+    function gustosDelGrupo() {
+        const p = prefsDeUsuario();
+        if (!p) return null;
+        const g = gruposGuardados[codigoGrupoActual], otros = {};
+        (g ? g.miembros : []).filter(n => n !== nombreUsuario).forEach(n => {
+            const q = prefsDeMiembro(n);
+            if (q) q.comida.forEach(c => { const t = TIPO_GUSTO[c]; if (t) otros[t] = (otros[t] || 0) + 1; });
+        });
+        const idx = PRESUPUESTOS.indexOf(p.presupuesto), precioMax = idx < 0 ? 0 : Math.min(idx + 1, 3);
+        const dieta = p.restricciones.map(r => ({ "Vegetariano": "vegetariano", "Sin gluten": "sin-gluten" })[r]).filter(Boolean);
+        const texto = p.comida.filter(c => c !== "Sin elegir")
+            .concat(precioMax ? ["hasta " + "₡".repeat(precioMax)] : [], dieta.map(d => DIETA[d]));
+        return { tipos: p.comida.map(c => TIPO_GUSTO[c]).filter(Boolean), otrosTipos: otros, precioMax: precioMax,
+                 cerca: p.ubicacion === "Cerca de mí" || p.tiempo === "30 minutos", dieta: dieta, texto: texto.join(" · ") };
+    }
+
+    function pintarOpciones(nombres) {
+        const lista = document.getElementById("listaRestaurantes");
+        lista.innerHTML = "";
+        nombres.forEach((nombre, i) => {
+            const l = datosLugar(nombre), c = document.createElement("div");
+            c.className = "restaurant";
+            Object.assign(c.dataset, { nombre: l.nombre, tipo: l.tipo, i: i, rating: l.rating, km: l.km, precio: l.precio, match: 0 });
+            c.innerHTML = '<div class="restaurant-img">' + arte(l.tipo) + '</div><div class="restaurant-info"><h3>' + esc(l.nombre) + '</h3><p>' + esc(l.comida) + '</p>' +
+                '<p class="meta">' + icoSm("i-star") + ' <strong>' + l.rating + '</strong> (' + l.resenas + ')</p>' +
+                '<p class="meta" title="Precio" aria-label="Precio ' + precio(l) + '">' + precio(l) + '</p>' +
+                '<p class="meta">' + icoSm("i-pin") + ' ' + km(l) + '</p>' +
+                '<button class="restaurant-action" type="button">Ver detalles</button></div>';
+            c.querySelector(".restaurant-action").addEventListener("click", () => verDetalle(l.nombre));
+            c.appendChild(crearCorazon(l.nombre));
+            lista.appendChild(c);
+        });
+        const g = gruposGuardados[codigoGrupoActual];
+        document.getElementById("notaSorteo").innerHTML = g && g.notaGustos
+            ? ico("i-heart") + "<span>" + nombres.length + " lugares elegidos según los gustos del grupo: <strong>" + esc(g.notaGustos) + "</strong></span>"
+            : ico("i-dice") + "<span>" + nombres.length + " lugares sorteados del banco" + (g ? " · uno por participante" : "") + "</span>";
+        pintarCorazones();
+        filtrarRestaurantes();
+    }
+
+    window.verDetalle = function (nombre) {
+        const l = datosLugar(nombre), s = document.getElementById("detalle");
+        document.getElementById("detalleArte").setAttribute("href", "#" + (ARTE[l.tipo] || "art-tipica"));
+        document.getElementById("detalleNombre").textContent = l.nombre;
+        document.getElementById("detalleComida").textContent = l.comida;
+        document.getElementById("detalleRating").textContent = l.rating;
+        document.getElementById("detalleResenas").textContent = l.resenas;
+        document.getElementById("detalleKm").textContent = km(l);
+        document.getElementById("detallePrecio").textContent = precio(l);
+        document.getElementById("detalleHorario").textContent = l.horario;
+        document.getElementById("detalleDieta").textContent = l.dieta.length
+            ? "Opciones " + l.dieta.map(d => DIETA[d]).join(" y ") : "Sin opciones especiales confirmadas";
+        document.getElementById("detalleDescripcion").textContent = l.descripcion;
+        let h = s.querySelector(".detail-image .heart");
+        if (!h) { h = crearCorazon(l.nombre); s.querySelector(".detail-image").appendChild(h); }
+        h.dataset.nombre = l.nombre;
+        pintarCorazones();
+        mostrarPantalla("detalle");
+    };
+
+    function pintarComparar(nombres) {
+        const ls = nombres.map(datosLugar);
+        document.getElementById("compararHead").innerHTML = "<tr><th>Característica</th>" + ls.map(l => "<th>" + esc(l.nombre) + "</th>").join("") + "</tr>";
+        const filas = [["Comida", l => l.comida], ["Precio", precio, l => l.precio, "min"], ["Distancia", km, l => l.km, "min"], ["Calificación", l => l.rating, l => l.rating, "max"]];
+        document.getElementById("compararBody").innerHTML = filas.map(([titulo, texto, valor, mejor]) => {
+            const nums = valor ? ls.map(valor) : [], top = mejor === "max" ? Math.max(...nums) : Math.min(...nums);
+            return "<tr><td>" + titulo + "</td>" + ls.map((l, i) => valor && nums[i] === top
+                ? '<td class="best">' + ico("i-check") + esc(texto(l)) + "</td>"
+                : "<td>" + esc(texto(l)) + "</td>").join("") + "</tr>";
+        }).join("");
+    }
+
+    function pintarVotacion(nombres) {
+        document.getElementById("opcionesVoto").innerHTML = nombres.map(n => {
+            const l = datosLugar(n);
+            return '<div class="vote-option" onclick="seleccionarVoto(this)"><label><input type="radio" name="restaurant" value="' + esc(l.nombre) + '"><strong>' + esc(l.nombre) +
+                '</strong><p>' + esc(l.comida) + " · " + precio(l) + " · " + km(l) + "</p></label></div>";
+        }).join("");
+    }
+
+    function pintarInfoDecision() {
+        const g = gruposGuardados[codigoGrupoActual], box = document.getElementById("infoDecision");
+        const esRuleta = !!g && g.modo === "ruleta", ls = lugaresSesion();
+        const boton = document.querySelector("#comparar .btn-primary");
+        boton.innerHTML = esRuleta ? ico("i-wheel") + " Ir a la ruleta" : "Continuar a votación";
+        if (!g) return;
+        const n = g.miembros.length, pend = decisionPendiente();
+        const accion = esRuleta
+            ? '<button class="btn btn-secondary btn-inline" type="button" onclick="prepararVotacion()">' + ico("i-wheel") + (ruletaResuelta() ? " Ver resultado de la ruleta" : " Ver la ruleta") + "</button>"
+            : pend ? '<button class="btn btn-primary btn-inline" type="button" onclick="abrirRuletaEmpate()">' + ico("i-wheel") + " Desempatar con la ruleta</button>" : "";
+        box.innerHTML = '<div class="dc-row"><span class="dc-ico">' + ico(esRuleta ? "i-wheel" : "i-trophy") + '</span><div><strong>' +
+            (esRuleta ? "Decisión por ruleta" : "Votación clásica") + "</strong><small>" +
+            (esRuleta ? "Al terminar el tiempo, la suerte elegirá uno de los lugares del grupo." : "Gana el lugar con más votos. Si hay empate, al terminar el tiempo se desempata con la ruleta.") +
+            '</small></div></div><p class="dc-title">' + ls.length + " lugares para este grupo <span>· " + n + (n === 1 ? " participante" : " participantes") + "</span></p>" +
+            '<div class="dc-chips">' + ls.map(x => '<span class="tag">' + esc(x) + "</span>").join("") + "</div>" + accion;
+    }
+
+    function pintarLugaresSesion() {
+        const ls = lugaresSesion();
+        pintarOpciones(ls); pintarComparar(ls); pintarVotacion(ls); pintarInfoDecision();
+    }
+
+    // Al buscar opciones con las preferencias completas, se vuelven a elegir los lugares según los gustos
+    // (solo si todavía no hay votos ni resultado, para no cambiar una decisión en curso).
+    const _buscar = buscarOpciones;
+    buscarOpciones = function () {
+        _buscar();
+        if (!document.getElementById("opciones").classList.contains("active")) return;
+        const g = gruposGuardados[codigoGrupoActual], gustos = gustosDelGrupo();
+        const decidido = ultimosVotos || ruletaResuelta() || sesionCerrada || (g && g.cerrado);
+        if (g && gustos && !decidido) {
+            g.lugares = sortearLugares(g.miembros.length, gustos);
+            g.notaGustos = gustos.texto;
+            g.votosSimulados = {};
+            ruleta = null;
+        }
+        pintarLugaresSesion();
+        actualizarMatch();
+    };
+
+    /* ---------- 3. Método de decisión al crear el grupo ---------- */
+    let metodoPendiente = null;
+    window.cambiarMetodo = function () {
+        const r = (document.querySelector('input[name="metodoDecision"]:checked') || {}).value === "ruleta";
+        document.getElementById("bloqueTipoVotacion").hidden = r;
+    };
+    const _crear = continuarCrearGrupo;
+    continuarCrearGrupo = function () {
+        const metodo = (document.querySelector('input[name="metodoDecision"]:checked') || {}).value || "votacion";
+        // Con ruleta no hay votos que mostrar: se usa "pública" por defecto
+        if (metodo === "ruleta" && !document.querySelector('input[name="tipoVotacion"]:checked')) {
+            document.querySelector('input[name="tipoVotacion"][value="publica"]').checked = true;
+        }
+        metodoPendiente = metodo;
+        _crear();
+        metodoPendiente = null;
+    };
+
+    const _ini = iniciarSesion;
+    iniciarSesion = function (codigo, esNueva) {
+        const g = gruposGuardados[codigo];
+        if (g) {
+            if (metodoPendiente) g.modo = metodoPendiente;
+            g.modo = g.modo || "votacion";
+            if (!g.lugares) g.lugares = sortearLugares(g.miembros.length);
+        }
+        ruleta = null; empateActual = null;
+        _ini(codigo, esNueva);
+        pintarLugaresSesion();
+    };
+
+    const _prep = prepararVotacion;
+    prepararVotacion = function () {
+        const g = gruposGuardados[codigoGrupoActual];
+        if (g && g.modo === "ruleta") { abrirRuleta(lugaresSesion(), "modo"); return; }
+        _prep();
+    };
+
+    /* ---------- 4. Tiempo de votación: la ruleta solo gira cuando termina ---------- */
+    const votacionEnCurso = () => sesionActiva && !sesionCerrada && segundosRestantes > 0;
+    const ruletaResuelta = () => !!(ruleta && ruleta.ganador && ruleta.codigo === codigoGrupoActual);
+
+    // Decisión que queda en manos de la ruleta: método ruleta sin girar o empate sin resolver
+    function decisionPendiente() {
+        const g = gruposGuardados[codigoGrupoActual];
+        if (!g) return null;
+        if (g.modo === "ruleta") return ruletaResuelta() ? null : { opciones: lugaresSesion(), motivo: "modo" };
+        if (empateActual && !ruletaResuelta()) return { opciones: empateActual, motivo: "empate" };
+        return null;
+    }
+
+    const _tick = actualizarTemporizador;
+    actualizarTemporizador = function () {
+        _tick();
+        if (ruleta && !ruleta.ganador && !ruleta.girando && document.getElementById("ruleta").classList.contains("active")) pintarEstadoRuleta();
+        // En resultados solo se actualiza el contador (no se redibuja la tarjeta para no perder el foco)
+        const t = empateActual && document.querySelector("#resultados.active #avisoEmpate .lock-note strong");
+        if (t && votacionEnCurso()) t.textContent = reloj2(segundosRestantes);
+        else if (t) pintarDesempate();
+    };
+
+    const _cerrar = cerrarSesionPorTiempo;
+    cerrarSesionPorTiempo = function () {
+        const pend = decisionPendiente();
+        if (!pend) { _cerrar(); pintarInfoDecision(); return; }
+        // El cierre original guarda un ganador; aquí aún no lo hay, así que se deja pendiente
+        ganadorActual = "Pendiente de ruleta";
+        _cerrar();
+        ganadorActual = "";
+        historialGrupos = JSON.parse(localStorage.getItem("dondeComemosHistorial") || "[]");
+        const item = historialGrupos.find(x => x.codigo === codigoGrupoActual && x.usuario === nombreUsuario);
+        if (item) { item.ganador = ""; item.estado = "en curso"; }
+        if (notificaciones[0] && notificaciones[0].codigo === codigoGrupoActual) {
+            notificaciones[0].titulo = "¡Tiempo terminado! Hora de girar la ruleta";
+            notificaciones[0].mensaje = 'La sesión "' + nombreGrupoActual + '" llegó a cero. ' + (pend.motivo === "empate"
+                ? "Hubo un empate entre " + unir(pend.opciones) + ": giren la ruleta para desempatar."
+                : "Ya pueden girar la ruleta para elegir el lugar.");
+        }
+        localStorage.setItem("dondeComemosHistorial", JSON.stringify(historialGrupos));
+        localStorage.setItem("dondeComemosNotificaciones", JSON.stringify(notificaciones));
+        pintarInfoDecision();
+        abrirRuleta(pend.opciones, pend.motivo);
+        avisar("¡Se acabó el tiempo! Ya pueden girar la ruleta.");
+    };
+
+    // Cuando la ruleta decide con la sesión ya cerrada, se guarda el resultado en historial y notificaciones
+    function guardarResultadoRuleta(nombre) {
+        const g = gruposGuardados[codigoGrupoActual];
+        if (!g || !g.cerrado) return;
+        const fecha = new Date().toLocaleString("es-CR");
+        historialGrupos = JSON.parse(localStorage.getItem("dondeComemosHistorial") || "[]");
+        const item = historialGrupos.find(x => x.codigo === codigoGrupoActual && x.usuario === nombreUsuario);
+        if (item) { item.ganador = nombre; item.estado = "finalizado"; item.fecha = fecha; }
+        notificaciones.unshift({ titulo: "Resultado de la ruleta", mensaje: 'En "' + nombreGrupoActual + '" la suerte eligió: ' + nombre + ".", fecha: fecha, codigo: codigoGrupoActual });
+        localStorage.setItem("dondeComemosHistorial", JSON.stringify(historialGrupos));
+        localStorage.setItem("dondeComemosNotificaciones", JSON.stringify(notificaciones));
+        actualizarContadorNotificaciones();
+    }
+
+    /* ---------- 5. Empate en la votación ---------- */
+    let empateActual = null;
+    const _pr = pintarResultados;
+    pintarResultados = function (v, u) {
+        _pr(v, u);
+        const ops = Object.keys(v), max = Math.max(...ops.map(l => v[l].length)), emp = ops.filter(l => v[l].length === max);
+        empateActual = emp.length > 1 && max > 0 ? emp : null;
+        if (ruleta && ruleta.motivo === "empate") ruleta = null;
+        pintarDesempate();
+        pintarInfoDecision();
+    };
+
+    function pintarDesempate() {
+        let card = document.getElementById("avisoEmpate");
+        if (!card) {
+            card = document.createElement("div");
+            card.id = "avisoEmpate"; card.className = "tie-card";
+            document.querySelector("#resultados .winner").after(card);
+        }
+        const confirmar = document.querySelector("#resultados .res-actions .btn-primary");
+        if (!empateActual) { card.hidden = true; confirmar.hidden = false; return; }
+        if (ruleta && ruleta.motivo === "empate" && ruleta.ganador) {
+            const l = lugares[ruleta.ganador];
+            document.getElementById("ganadorKicker").textContent = "Ganador por ruleta";
+            document.getElementById("ganadorNombre").textContent = ruleta.ganador;
+            document.getElementById("ganadorDetalle").textContent = "Desempate entre " + unir(empateActual);
+            document.getElementById("ganadorLugar").textContent = l.comida + " · " + l.detalle;
+            if (tipoVotacion !== "anonima") {
+                const vs = (ultimosVotos && ultimosVotos[ruleta.ganador]) || [];
+                document.getElementById("ganadorVotantes").innerHTML = vs.slice(0, 4).map(n => '<span class="avatar" title="' + esc(n) + '">' + esc(n.charAt(0).toUpperCase()) + "</span>").join("");
+                document.getElementById("ganadorQuienes").textContent = vs.length ? (vs.length === 1 ? "Votó " : "Votaron ") + unir(vs) : "";
+            }
+            card.hidden = true; confirmar.hidden = false;
+            return;
+        }
+        const espera = votacionEnCurso()
+            ? '<p class="lock-note">' + ico("i-lock") + "<span>La ruleta se habilita cuando termine el tiempo de votación (<strong>" + reloj2(segundosRestantes) + "</strong>).</span></p>"
+            : "";
+        card.innerHTML = '<div class="tie-head"><span class="tie-ico">' + ico("i-dice") + '</span><div><strong>¡Hay un empate!</strong><p>' +
+            esc(unir(empateActual)) + " tienen la misma cantidad de votos. Que la suerte decida.</p></div></div>" + espera +
+            '<button class="btn btn-primary" type="button" onclick="abrirRuletaEmpate()">' + ico("i-wheel") + (espera ? " Ver la ruleta" : " Desempatar con la ruleta") + "</button>";
+        card.hidden = false; confirmar.hidden = true;
+    }
+    window.abrirRuletaEmpate = () => { if (empateActual) abrirRuleta(empateActual, "empate"); };
+
+    /* ---------- 6. Ruleta ---------- */
+    let ruleta = null;
+    const color = i => "var(--w" + (i % 8 + 1) + ")";
+    function punto(r, grados) { const a = grados * Math.PI / 180; return (r * Math.sin(a)).toFixed(2) + " " + (-r * Math.cos(a)).toFixed(2); }
+
+    function abrirRuleta(opciones, motivo) {
+        const misma = ruleta && ruleta.motivo === motivo && ruleta.codigo === codigoGrupoActual && ruleta.opciones.join("|") === opciones.join("|");
+        if (!misma) ruleta = { opciones: opciones.slice(), motivo: motivo, codigo: codigoGrupoActual, ganador: null, girando: false, giro: 0 };
+        document.getElementById("tituloRuleta").textContent = motivo === "empate" ? "Desempate" : "Ruleta";
+        document.getElementById("ruletaNota").innerHTML = motivo === "empate"
+            ? "Hubo un empate entre <strong>" + esc(unir(opciones)) + "</strong>. Giren la ruleta: la suerte decide entre los lugares empatados."
+            : "El administrador eligió decidir por ruleta. Participan los <strong>" + opciones.length + " lugares</strong> elegidos para este grupo.";
+        pintarRueda();
+        mostrarPantalla("ruleta");
+    }
+
+    function pintarRueda() {
+        const n = ruleta.opciones.length, paso = 360 / n, rueda = document.getElementById("ruletaRueda");
+        let svg = '<circle r="100" fill="#1f1a17"/>';
+        ruleta.opciones.forEach((nombre, i) => {
+            svg += '<path d="M0 0L' + punto(90, i * paso) + "A90 90 0 0 1 " + punto(90, (i + 1) * paso) + 'Z" style="fill:' + color(i) + '" stroke="#fff" stroke-width="1.5"/>' +
+                '<text class="wheel-num" transform="rotate(' + ((i + .5) * paso).toFixed(2) + ') translate(0 -60)">' + (i + 1) + "</text>";
+        });
+        for (let k = 0; k < 24; k++) {
+            const [x, y] = punto(95, k * 15).split(" ");
+            svg += '<circle cx="' + x + '" cy="' + y + '" r="1.9" style="fill:' + (k % 2 ? "#fff" : "var(--c-yellow)") + '"/>';
+        }
+        rueda.innerHTML = svg;
+        rueda.setAttribute("aria-label", "Ruleta con " + n + " lugares: " + unir(ruleta.opciones));
+        // Sin animación al abrir: se muestra en su posición actual
+        rueda.style.transition = "none";
+        rueda.style.transform = "rotate(" + ruleta.giro + "deg)";
+        void rueda.offsetWidth;
+        rueda.style.transition = "";
+        pintarEstadoRuleta();
+    }
+
+    function pintarEstadoRuleta() {
+        const r = ruleta, listo = !!r.ganador, bloqueada = !listo && votacionEnCurso();
+        document.getElementById("ruletaLeyenda").innerHTML = r.opciones.map((nombre, i) => {
+            const l = datosLugar(nombre), win = nombre === r.ganador;
+            return '<li class="' + (win ? "win" : "") + '"><span class="sw" style="background:' + color(i) + '">' + (i + 1) + "</span><span><strong>" + esc(nombre) +
+                "</strong><small>" + esc(l.comida) + " · " + precio(l) + " · " + km(l) + "</small></span>" +
+                (win ? '<span class="win-flag">' + ico("i-trophy") + "Ganador</span>" : "") + "</li>";
+        }).join("");
+        const res = document.getElementById("ruletaResultado");
+        res.hidden = !listo;
+        if (listo) {
+            const l = lugares[r.ganador];
+            res.innerHTML = '<span class="wr-ico">' + ico("i-trophy") + '</span><div><span class="k">' + (r.motivo === "empate" ? "La suerte desempató a favor de" : "La suerte eligió") +
+                "</span><strong>" + esc(r.ganador) + "</strong><small>" + esc(l.comida + " · " + l.detalle) + "</small></div>";
+        }
+        const aviso = document.getElementById("ruletaBloqueo");
+        aviso.hidden = !bloqueada;
+        if (bloqueada) aviso.innerHTML = ico("i-lock") + "<span>La ruleta se habilita cuando termine el tiempo de votación. Faltan <strong>" + reloj2(segundosRestantes) + "</strong>.</span>";
+        const centro = document.getElementById("ruletaCentro"), girar = document.getElementById("btnGirar");
+        centro.disabled = r.girando || listo || bloqueada;
+        centro.innerHTML = listo ? "¡Listo!" : r.girando ? "…" : bloqueada ? ico("i-lock") + "<small>" + reloj2(segundosRestantes) + "</small>" : "Girar";
+        centro.setAttribute("aria-label", bloqueada ? "Ruleta bloqueada hasta que termine el tiempo de votación" : "Girar la ruleta");
+        girar.hidden = listo;
+        girar.disabled = r.girando || bloqueada;
+        girar.innerHTML = bloqueada ? ico("i-lock") + " Disponible al terminar el tiempo"
+            : ico("i-wheel") + (r.girando ? " Girando…" : " Girar la ruleta");
+        document.getElementById("btnConfirmarRuleta").hidden = !listo;
+    }
+
+    window.girarRuleta = function () {
+        if (!ruleta || ruleta.girando) return;
+        if (ruleta.ganador) { avisar("La ruleta ya decidió: " + ruleta.ganador + "."); return; }
+        if (votacionEnCurso()) { avisar("La ruleta se habilita cuando termine el tiempo de votación (" + reloj2(segundosRestantes) + ")."); return; }
+        const n = ruleta.opciones.length, paso = 360 / n, w = Math.floor(Math.random() * n);
+        // Gira 6 vueltas y se detiene con el lugar ganador bajo el indicador (arriba)
+        ruleta.giro = 360 * 6 - (w + .5) * paso + (Math.random() - .5) * paso * .6;
+        ruleta.girando = true;
+        pintarEstadoRuleta();
+        document.getElementById("ruletaRueda").style.transform = "rotate(" + ruleta.giro + "deg)";
+        const r = ruleta, animar = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+        setTimeout(() => terminarGiro(r, w), animar ? 4700 : 300);
+    };
+
+    function terminarGiro(r, w) {
+        r.girando = false;
+        r.ganador = r.opciones[w];
+        if (ruleta !== r) return;
+        aplicarGanador(r.ganador);
+        guardarResultadoRuleta(r.ganador);
+        pintarEstadoRuleta();
+        if (r.motivo === "empate") pintarDesempate();
+        pintarInfoDecision();
+        avisar("¡La suerte eligió " + r.ganador + "!");
+    }
+
+    function aplicarGanador(nombre) {
+        const l = lugares[nombre];
+        ganadorActual = nombre;
+        document.getElementById("lugarConfirmado").textContent = nombre;
+        document.getElementById("comidaConfirmada").textContent = l.comida;
+        document.getElementById("detalleConfirmado").textContent = l.detalle;
+        document.getElementById("lugarMapa").textContent = nombre;
+        document.getElementById("detalleMapa").textContent = l.comida + " · " + l.detalle;
+    }
+
+    window.volverDeRuleta = () => mostrarPantalla(ruleta && ruleta.motivo === "empate" ? "resultados" : "comparar");
+
+    /* ---------- 7. Configuración: tamaño de letra y daltonismo ---------- */
+    const KEY_AJUSTES = "dondeComemosAjustes";
+    const NOMBRE_LETRA = { pequena: "pequeña", normal: "normal", grande: "grande", "muy-grande": "muy grande" };
+    const NOMBRE_DALT = { no: "naranja, verde y rojo (originales)", rg: "azul y ámbar", tri: "rojo y verde azulado" };
+    let ajustes = { letra: "normal", daltonismo: "no" };
+    try { Object.assign(ajustes, JSON.parse(localStorage.getItem(KEY_AJUSTES) || "{}")); } catch (e) {}
+
+    function aplicarAjustes() {
+        const html = document.documentElement;
+        html.dataset.letra = ajustes.letra;
+        html.dataset.daltonismo = ajustes.daltonismo;
+        document.querySelectorAll("#configuracion .seg-4 button").forEach(b => {
+            const on = b.dataset.letra === ajustes.letra;
+            b.classList.toggle("on", on); b.setAttribute("aria-pressed", on);
+        });
+        document.querySelectorAll('#configuracion input[name="daltonismo"]').forEach(i => { i.checked = i.value === ajustes.daltonismo; });
+    }
+    function guardarAjustes() { try { localStorage.setItem(KEY_AJUSTES, JSON.stringify(ajustes)); } catch (e) {} }
+
+    window.mostrarConfiguracion = function () { aplicarAjustes(); mostrarPantalla("configuracion"); };
+    window.cambiarLetra = function (v) { ajustes.letra = v; aplicarAjustes(); guardarAjustes(); avisar("Tamaño de letra: " + NOMBRE_LETRA[v] + "."); };
+    window.cambiarDaltonismo = function (v) { ajustes.daltonismo = v; aplicarAjustes(); guardarAjustes(); avisar("Colores: " + NOMBRE_DALT[v] + "."); };
+    window.restablecerAjustes = function () { ajustes = { letra: "normal", daltonismo: "no" }; aplicarAjustes(); guardarAjustes(); avisar("Se restablecieron los ajustes."); };
+
+    aplicarAjustes();
+    pintarLugaresSesion();
 })();
 </script>
 </body>
